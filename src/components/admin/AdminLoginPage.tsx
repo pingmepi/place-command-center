@@ -7,6 +7,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { AlertCircle, Shield, Users } from 'lucide-react';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { useAdminAuth } from './AdminAuthProvider';
+import { supabase } from '@/integrations/supabase/client';
 
 export function AdminLoginPage() {
   const [email, setEmail] = useState('');
@@ -44,8 +45,16 @@ export function AdminLoginPage() {
   const handleGoogleSignIn = async () => {
     setError('');
     try {
-      // Google OAuth will be implemented when configured
-      setError('Google sign-in is not configured yet. Please use email/password.');
+      const { error } = await supabase.auth.signInWithOAuth({
+        provider: 'google',
+        options: {
+          redirectTo: `${window.location.origin}/admin`
+        }
+      });
+      
+      if (error) {
+        setError(error.message);
+      }
     } catch (err) {
       setError('Google sign-in failed');
     }
