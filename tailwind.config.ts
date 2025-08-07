@@ -18,6 +18,10 @@ export default {
 			}
 		},
 		extend: {
+			fontFamily: {
+				sans: ['DM Sans', 'system-ui', '-apple-system', 'sans-serif'],
+				mono: ['Space Mono', 'Courier New', 'monospace'],
+			},
 			colors: {
 				border: 'hsl(var(--border))',
 				input: 'hsl(var(--input))',
@@ -26,15 +30,19 @@ export default {
 				foreground: 'hsl(var(--foreground))',
 				primary: {
 					DEFAULT: 'hsl(var(--primary))',
-					foreground: 'hsl(var(--primary-foreground))'
+					foreground: 'hsl(var(--primary-foreground))',
+					hover: 'hsl(var(--primary-hover))',
+					muted: 'hsl(var(--primary-muted))'
 				},
 				secondary: {
 					DEFAULT: 'hsl(var(--secondary))',
-					foreground: 'hsl(var(--secondary-foreground))'
+					foreground: 'hsl(var(--secondary-foreground))',
+					hover: 'hsl(var(--secondary-hover))'
 				},
 				destructive: {
 					DEFAULT: 'hsl(var(--destructive))',
-					foreground: 'hsl(var(--destructive-foreground))'
+					foreground: 'hsl(var(--destructive-foreground))',
+					muted: 'hsl(var(--destructive-muted))'
 				},
 				muted: {
 					DEFAULT: 'hsl(var(--muted))',
@@ -61,6 +69,22 @@ export default {
 					'accent-foreground': 'hsl(var(--sidebar-accent-foreground))',
 					border: 'hsl(var(--sidebar-border))',
 					ring: 'hsl(var(--sidebar-ring))'
+				},
+				admin: {
+					sidebar: 'hsl(var(--admin-sidebar))',
+					'sidebar-foreground': 'hsl(var(--admin-sidebar-foreground))',
+					'sidebar-accent': 'hsl(var(--admin-sidebar-accent))',
+					'sidebar-muted': 'hsl(var(--admin-sidebar-muted))'
+				},
+				success: {
+					DEFAULT: 'hsl(var(--success))',
+					foreground: 'hsl(var(--success-foreground))',
+					muted: 'hsl(var(--success-muted))'
+				},
+				warning: {
+					DEFAULT: 'hsl(var(--warning))',
+					foreground: 'hsl(var(--warning-foreground))',
+					muted: 'hsl(var(--warning-muted))'
 				}
 			},
 			borderRadius: {

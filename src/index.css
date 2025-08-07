@@ -1,42 +1,78 @@
+@import url('https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,100..1000;1,9..40,100..1000&family=Space+Mono:ital,wght@0,400;0,700;1,400;1,700&display=swap');
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
-/* Definition of the design system. All colors, gradients, fonts, etc should be defined here. 
+/* MyThirdPlace Admin Panel Design System
+Professional admin interface with sophisticated blue/slate theme optimized for productivity.
 All colors MUST be HSL.
 */
 
 @layer base {
   :root {
-    --background: 0 0% 100%;
-    --foreground: 222.2 84% 4.9%;
+    /* Admin Light Theme - Professional with high contrast */
+    --background: 0 0% 99%;
+    --foreground: 215 25% 12%;
 
     --card: 0 0% 100%;
-    --card-foreground: 222.2 84% 4.9%;
+    --card-foreground: 215 25% 12%;
 
     --popover: 0 0% 100%;
-    --popover-foreground: 222.2 84% 4.9%;
+    --popover-foreground: 215 25% 12%;
 
-    --primary: 222.2 47.4% 11.2%;
-    --primary-foreground: 210 40% 98%;
+    /* Primary - Professional Blue */
+    --primary: 217 91% 60%;
+    --primary-foreground: 0 0% 100%;
+    --primary-hover: 217 84% 55%;
+    --primary-muted: 217 91% 95%;
 
-    --secondary: 210 40% 96.1%;
-    --secondary-foreground: 222.2 47.4% 11.2%;
+    /* Secondary - Sophisticated Slate */
+    --secondary: 215 15% 96%;
+    --secondary-foreground: 215 25% 12%;
+    --secondary-hover: 215 15% 92%;
 
-    --muted: 210 40% 96.1%;
-    --muted-foreground: 215.4 16.3% 46.9%;
+    --muted: 215 15% 96%;
+    --muted-foreground: 215 15% 45%;
 
-    --accent: 210 40% 96.1%;
-    --accent-foreground: 222.2 47.4% 11.2%;
+    --accent: 215 15% 94%;
+    --accent-foreground: 215 25% 12%;
 
-    --destructive: 0 84.2% 60.2%;
-    --destructive-foreground: 210 40% 98%;
+    /* Admin-specific colors */
+    --admin-sidebar: 215 25% 8%;
+    --admin-sidebar-foreground: 215 15% 85%;
+    --admin-sidebar-accent: 215 25% 12%;
+    --admin-sidebar-muted: 215 15% 65%;
 
-    --border: 214.3 31.8% 91.4%;
-    --input: 214.3 31.8% 91.4%;
-    --ring: 222.2 84% 4.9%;
+    /* Status colors */
+    --success: 142 76% 36%;
+    --success-foreground: 0 0% 100%;
+    --success-muted: 142 76% 95%;
 
-    --radius: 0.5rem;
+    --warning: 38 92% 50%;
+    --warning-foreground: 0 0% 100%;
+    --warning-muted: 38 92% 95%;
+
+    --destructive: 0 84% 60%;
+    --destructive-foreground: 0 0% 100%;
+    --destructive-muted: 0 84% 95%;
+
+    /* Border and inputs */
+    --border: 215 15% 88%;
+    --input: 215 15% 92%;
+    --ring: 217 91% 60%;
+
+    /* Gradients for visual appeal */
+    --gradient-primary: linear-gradient(135deg, hsl(217 91% 60%), hsl(217 84% 55%));
+    --gradient-card: linear-gradient(145deg, hsl(0 0% 100%), hsl(215 15% 98%));
+    --gradient-sidebar: linear-gradient(180deg, hsl(215 25% 8%), hsl(215 25% 6%));
+
+    /* Shadows for depth */
+    --shadow-card: 0 4px 6px -1px hsl(215 25% 12% / 0.1), 0 2px 4px -1px hsl(215 25% 12% / 0.06);
+    --shadow-elevated: 0 10px 15px -3px hsl(215 25% 12% / 0.1), 0 4px 6px -2px hsl(215 25% 12% / 0.05);
+    --shadow-modal: 0 25px 50px -12px hsl(215 25% 12% / 0.25);
+
+    --radius: 1rem;
 
     --sidebar-background: 0 0% 98%;
 
@@ -56,41 +92,74 @@ All colors MUST be HSL.
   }
 
   .dark {
-    --background: 222.2 84% 4.9%;
-    --foreground: 210 40% 98%;
+    /* Admin Dark Theme - Sophisticated and eye-friendly */
+    --background: 215 25% 6%;
+    --foreground: 215 15% 88%;
 
-    --card: 222.2 84% 4.9%;
-    --card-foreground: 210 40% 98%;
+    --card: 215 25% 8%;
+    --card-foreground: 215 15% 88%;
 
-    --popover: 222.2 84% 4.9%;
-    --popover-foreground: 210 40% 98%;
+    --popover: 215 25% 8%;
+    --popover-foreground: 215 15% 88%;
 
-    --primary: 210 40% 98%;
-    --primary-foreground: 222.2 47.4% 11.2%;
+    /* Primary stays vibrant in dark mode */
+    --primary: 217 91% 65%;
+    --primary-foreground: 215 25% 8%;
+    --primary-hover: 217 91% 70%;
+    --primary-muted: 217 91% 15%;
 
-    --secondary: 217.2 32.6% 17.5%;
-    --secondary-foreground: 210 40% 98%;
+    --secondary: 215 25% 12%;
+    --secondary-foreground: 215 15% 85%;
+    --secondary-hover: 215 25% 16%;
 
-    --muted: 217.2 32.6% 17.5%;
-    --muted-foreground: 215 20.2% 65.1%;
+    --muted: 215 25% 12%;
+    --muted-foreground: 215 15% 65%;
 
-    --accent: 217.2 32.6% 17.5%;
-    --accent-foreground: 210 40% 98%;
+    --accent: 215 25% 14%;
+    --accent-foreground: 215 15% 88%;
 
-    --destructive: 0 62.8% 30.6%;
-    --destructive-foreground: 210 40% 98%;
+    /* Admin sidebar in dark mode */
+    --admin-sidebar: 215 25% 4%;
+    --admin-sidebar-foreground: 215 15% 82%;
+    --admin-sidebar-accent: 215 25% 8%;
+    --admin-sidebar-muted: 215 15% 55%;
 
-    --border: 217.2 32.6% 17.5%;
-    --input: 217.2 32.6% 17.5%;
-    --ring: 212.7 26.8% 83.9%;
-    --sidebar-background: 240 5.9% 10%;
-    --sidebar-foreground: 240 4.8% 95.9%;
-    --sidebar-primary: 224.3 76.3% 48%;
-    --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 240 3.7% 15.9%;
-    --sidebar-accent-foreground: 240 4.8% 95.9%;
-    --sidebar-border: 240 3.7% 15.9%;
-    --sidebar-ring: 217.2 91.2% 59.8%;
+    /* Status colors adjusted for dark theme */
+    --success: 142 70% 45%;
+    --success-foreground: 215 25% 8%;
+    --success-muted: 142 70% 12%;
+
+    --warning: 38 88% 55%;
+    --warning-foreground: 215 25% 8%;
+    --warning-muted: 38 88% 12%;
+
+    --destructive: 0 84% 65%;
+    --destructive-foreground: 215 25% 8%;
+    --destructive-muted: 0 84% 12%;
+
+    --border: 215 25% 16%;
+    --input: 215 25% 14%;
+    --ring: 217 91% 65%;
+
+    /* Dark theme gradients */
+    --gradient-primary: linear-gradient(135deg, hsl(217 91% 65%), hsl(217 84% 60%));
+    --gradient-card: linear-gradient(145deg, hsl(215 25% 8%), hsl(215 25% 6%));
+    --gradient-sidebar: linear-gradient(180deg, hsl(215 25% 4%), hsl(215 25% 3%));
+
+    /* Enhanced shadows for dark theme */
+    --shadow-card: 0 4px 6px -1px hsl(215 25% 3% / 0.3), 0 2px 4px -1px hsl(215 25% 3% / 0.2);
+    --shadow-elevated: 0 10px 15px -3px hsl(215 25% 3% / 0.4), 0 4px 6px -2px hsl(215 25% 3% / 0.25);
+    --shadow-modal: 0 25px 50px -12px hsl(215 25% 3% / 0.5);
+
+    /* Updated sidebar variables for consistency */
+    --sidebar-background: 215 25% 4%;
+    --sidebar-foreground: 215 15% 82%;
+    --sidebar-primary: 217 91% 65%;
+    --sidebar-primary-foreground: 215 25% 4%;
+    --sidebar-accent: 215 25% 8%;
+    --sidebar-accent-foreground: 215 15% 85%;
+    --sidebar-border: 215 25% 12%;
+    --sidebar-ring: 217 91% 65%;
   }
 }
 
@@ -100,6 +169,53 @@ All colors MUST be HSL.
   }
 
   body {
-    @apply bg-background text-foreground;
+    @apply bg-background text-foreground font-sans;
+    font-family: 'DM Sans', system-ui, -apple-system, sans-serif;
+  }
+
+  /* Professional typography scale */
+  h1 { @apply text-3xl font-bold tracking-tight; }
+  h2 { @apply text-2xl font-semibold tracking-tight; }
+  h3 { @apply text-xl font-semibold tracking-tight; }
+  h4 { @apply text-lg font-medium; }
+  h5 { @apply text-base font-medium; }
+  h6 { @apply text-sm font-medium; }
+
+  /* Code font for technical content */
+  code, pre {
+    font-family: 'Space Mono', 'Courier New', monospace;
+  }
+}
+
+@layer components {
+  /* Admin-specific utility classes */
+  .admin-gradient {
+    background: var(--gradient-primary);
+  }
+
+  .card-gradient {
+    background: var(--gradient-card);
+  }
+
+  .admin-shadow {
+    box-shadow: var(--shadow-card);
+  }
+
+  .admin-shadow-elevated {
+    box-shadow: var(--shadow-elevated);
+  }
+
+  .admin-shadow-modal {
+    box-shadow: var(--shadow-modal);
+  }
+
+  /* Smooth transitions for admin interactions */
+  .admin-transition {
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
+  /* Focus styles for accessibility */
+  .admin-focus {
+    @apply focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 focus:ring-offset-background;
   }
 }
