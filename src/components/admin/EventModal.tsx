@@ -88,6 +88,24 @@ export function EventModal({ isOpen, onClose, onSuccess, event }: EventModalProp
     },
   });
 
+  // Reset form values when event data changes
+  React.useEffect(() => {
+    if (isOpen) {
+      form.reset({
+        title: event?.title || '',
+        description: event?.description || '',
+        date_time: event ? new Date(event.date_time) : undefined,
+        venue: event?.venue || '',
+        capacity: event?.capacity || 50,
+        price: event?.price || 0,
+        currency: event?.currency || 'INR',
+        image_url: event?.image_url || '',
+        community_id: event?.community_id || '',
+        host_id: event?.host_id || '',
+      });
+    }
+  }, [event, isOpen, form]);
+
   useEffect(() => {
     if (isOpen) {
       loadCommunities();

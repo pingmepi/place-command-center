@@ -50,6 +50,18 @@ export function CommunityModal({ isOpen, onClose, onSuccess, community }: Commun
     },
   });
 
+  // Reset form values when community data changes
+  React.useEffect(() => {
+    if (isOpen) {
+      form.reset({
+        name: community?.name || '',
+        city: community?.city || '',
+        description: community?.description || '',
+        image_url: community?.image_url || '',
+      });
+    }
+  }, [community, isOpen, form]);
+
   const onSubmit = async (data: CommunityFormData) => {
     try {
       if (isEditing) {

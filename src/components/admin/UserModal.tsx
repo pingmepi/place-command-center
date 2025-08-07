@@ -55,6 +55,19 @@ export function UserModal({ isOpen, onClose, onSuccess, user }: UserModalProps) 
     },
   });
 
+  // Reset form values when user data changes
+  React.useEffect(() => {
+    if (isOpen) {
+      form.reset({
+        name: user?.name || '',
+        photo_url: user?.photo_url || '',
+        role: user?.role || 'user',
+        is_banned: user?.is_banned || false,
+        referral_code: user?.referral_code || '',
+      });
+    }
+  }, [user, isOpen, form]);
+
   const onSubmit = async (data: UserFormData) => {
     try {
       if (isEditing) {
