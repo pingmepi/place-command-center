@@ -264,7 +264,6 @@ export function EventModal({ isOpen, onClose, onSuccess, event }: EventModalProp
                         </SelectTrigger>
                       </FormControl>
                       <SelectContent>
-                        <SelectItem value="">No host</SelectItem>
                         {users.map((user) => (
                           <SelectItem key={user.id} value={user.id}>
                             {user.name}
