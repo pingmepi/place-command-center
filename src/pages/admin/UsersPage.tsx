@@ -180,27 +180,59 @@ export default function UsersPage() {
   const loadUsers = async () => {
     try {
       setIsLoading(true);
+      console.log('Loading users...');
       
-      const { data: usersData, error } = await supabase
+      // First get basic user data
+      const { data: usersData, error: usersError } = await supabase
         .from('users')
-        .select(`
-          *,
-          community_count:community_members(count),
-          event_count:event_registrations(count),
-          badge_count:user_badges(count)
-        `)
+        .select('*')
         .order('created_at', { ascending: false });
 
-      if (error) throw error;
+      if (usersError) {
+        console.error('Users query error:', usersError);
+        throw usersError;
+      }
 
-      const transformedData = usersData?.map(user => ({
-        ...user,
-        community_count: user.community_count?.[0]?.count || 0,
-        event_count: user.event_count?.[0]?.count || 0,
-        badge_count: user.badge_count?.[0]?.count || 0,
-      })) || [];
+      console.log('Users data:', usersData);
 
-      setUsers(transformedData);
+      // Get counts separately to avoid complex joins
+      const usersWithCounts = await Promise.all(
+        (usersData || []).map(async (user) => {
+          try {
+            const [communityResult, eventResult, badgeResult] = await Promise.all([
+              supabase
+                .from('community_members')
+                .select('user_id')
+                .eq('user_id', user.id),
+              supabase
+                .from('event_registrations')
+                .select('user_id')
+                .eq('user_id', user.id),
+              supabase
+                .from('user_badges')
+                .select('user_id')
+                .eq('user_id', user.id)
+            ]);
+
+            return {
+              ...user,
+              community_count: communityResult.data?.length || 0,
+              event_count: eventResult.data?.length || 0,
+              badge_count: badgeResult.data?.length || 0,
+            };
+          } catch (error) {
+            console.error(`Error loading counts for user ${user.id}:`, error);
+            return {
+              ...user,
+              community_count: 0,
+              event_count: 0,
+              badge_count: 0,
+            };
+          }
+        })
+      );
+
+      setUsers(usersWithCounts);
     } catch (error) {
       console.error('Error loading users:', error);
       toast({

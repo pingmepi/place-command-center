@@ -23,6 +23,7 @@ import RegistrationsPage from "@/pages/admin/RegistrationsPage";
 import ModerationPage from "@/pages/admin/ModerationPage";
 import AnalyticsPage from "@/pages/admin/AnalyticsPage";
 import AdvancedUserManagementPage from "@/pages/admin/AdvancedUserManagementPage";
+import SystemSettingsPage from "@/pages/admin/SystemSettingsPage";
 
 const queryClient = new QueryClient();
 
@@ -56,7 +57,7 @@ const App = () => (
                 <Route path="moderation" element={<ModerationPage />} />
                 <Route path="analytics" element={<AnalyticsPage />} />
                 <Route path="advanced-users" element={<AdvancedUserManagementPage />} />
-                <Route path="settings" element={<div>System Settings - Coming Soon</div>} />
+                <Route path="settings" element={<SystemSettingsPage />} />
               </Route>
               
               {/* Catch-all route */}

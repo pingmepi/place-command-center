@@ -178,12 +178,31 @@ export default function ModerationPage() {
     }
   };
 
-  const handleResolveFlag = (flag: Flag) => {
-    toast({
-      title: "Resolve Flag",
-      description: `Flag resolved - Feature coming soon!`,
-      variant: "default",
-    });
+  const handleResolveFlag = async (flag: Flag) => {
+    try {
+      // Simulate resolving the flag by deleting it
+      const { error } = await supabase
+        .from('flags')
+        .delete()
+        .eq('id', flag.id);
+
+      if (error) throw error;
+
+      toast({
+        title: "Flag Resolved",
+        description: `Flag has been resolved successfully.`,
+      });
+      
+      // Refresh the flags list
+      loadFlags();
+    } catch (error) {
+      console.error('Error resolving flag:', error);
+      toast({
+        title: "Error",
+        description: "Failed to resolve flag.",
+        variant: "destructive",
+      });
+    }
   };
 
   const handleDismissFlag = (flag: Flag) => {
