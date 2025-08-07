@@ -184,14 +184,14 @@ export function DataTable<T extends Record<string, any>>({
           {filters.map((filter) => (
             <Select
               key={filter.key.toString()}
-              value={filterValues[filter.key.toString()] || ''}
-              onValueChange={(value) => handleFilterChange(filter.key.toString(), value)}
+              value={filterValues[filter.key.toString()] || '__all__'}
+              onValueChange={(value) => handleFilterChange(filter.key.toString(), value === '__all__' ? '' : value)}
             >
               <SelectTrigger className="w-[180px] admin-focus">
                 <SelectValue placeholder={filter.label} />
               </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="">All {filter.label}</SelectItem>
+              <SelectContent className="bg-popover border border-border">
+                <SelectItem value="__all__">All {filter.label}</SelectItem>
                 {filter.options.map((option) => (
                   <SelectItem key={option.value} value={option.value}>
                     {option.label}
