@@ -14,6 +14,11 @@ import { AdminLayout } from "@/components/admin/AdminLayout";
 import { ProtectedAdminRoute } from "@/components/admin/ProtectedAdminRoute";
 import AdminDashboard from "@/pages/admin/AdminDashboard";
 import CommunitiesPage from "@/pages/admin/CommunitiesPage";
+import EventsPage from "@/pages/admin/EventsPage";
+import UsersPage from "@/pages/admin/UsersPage";
+import DiscussionsPage from "@/pages/admin/DiscussionsPage";
+import RegistrationsPage from "@/pages/admin/RegistrationsPage";
+import ModerationPage from "@/pages/admin/ModerationPage";
 
 const queryClient = new QueryClient();
 
@@ -38,11 +43,11 @@ const App = () => (
               }>
                 <Route index element={<AdminDashboard />} />
                 <Route path="communities" element={<CommunitiesPage />} />
-                <Route path="events" element={<div>Events Management - Coming Soon</div>} />
-                <Route path="users" element={<div>User Management - Coming Soon</div>} />
-                <Route path="discussions" element={<div>Discussion Management - Coming Soon</div>} />
-                <Route path="registrations" element={<div>Registration Management - Coming Soon</div>} />
-                <Route path="moderation" element={<div>Content Moderation - Coming Soon</div>} />
+                <Route path="events" element={<EventsPage />} />
+                <Route path="users" element={<UsersPage />} />
+                <Route path="discussions" element={<DiscussionsPage />} />
+                <Route path="registrations" element={<RegistrationsPage />} />
+                <Route path="moderation" element={<ModerationPage />} />
                 <Route path="analytics" element={<div>Analytics - Coming Soon</div>} />
                 <Route path="settings" element={<div>System Settings - Coming Soon</div>} />
               </Route>
