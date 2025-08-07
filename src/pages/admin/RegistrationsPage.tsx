@@ -139,7 +139,7 @@ const columns: Column<Registration>[] = [
 export default function RegistrationsPage() {
   const [registrations, setRegistrations] = useState<Registration[]>([]);
   const [isLoading, setIsLoading] = useState(true);
-  const [selectedRegistration, setSelectedRegistration] = useState<Registration | null>(null);
+  const [selectedRegistration, setSelectedRegistration] = useState<any>(null);
   const [isDetailsModalOpen, setIsDetailsModalOpen] = useState(false);
   const { toast } = useToast();
 
@@ -234,21 +234,29 @@ export default function RegistrationsPage() {
       id: registration.id,
       user: {
         name: registration.user.name,
-        email: `user@example.com`, // Placeholder
+        email: `user@example.com`, // Placeholder since email doesn't exist in users table
+        phone: undefined,
         photo_url: registration.user.photo_url,
       },
       event: {
         title: registration.event.title,
         date_time: registration.event.date_time,
         venue: registration.event.venue,
+        price: undefined, // Price not available in current data structure
+        currency: undefined, // Currency not available in current data structure
       },
       status: registration.status === 'success' ? 'confirmed' : 
-              registration.status === 'failed' ? 'cancelled' : 'pending',
-      payment_status: registration.status === 'success' ? 'paid' : 'pending',
+              registration.status === 'failed' ? 'cancelled' : 
+              registration.status === 'cancelled' ? 'cancelled' : 'pending',
+      payment_status: registration.status === 'success' ? 'paid' : 
+                     registration.status === 'failed' ? 'failed' : 'pending',
       payment_id: registration.payment_id,
       registered_at: registration.created_at,
+      special_requests: undefined,
+      dietary_preferences: undefined,
+      emergency_contact: undefined,
     };
-    setSelectedRegistration(transformedRegistration as any);
+    setSelectedRegistration(transformedRegistration);
     setIsDetailsModalOpen(true);
   };
 
