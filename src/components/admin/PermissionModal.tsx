@@ -145,13 +145,17 @@ export function PermissionModal({ isOpen, onClose, permission, onSave }: Permiss
       const resourceType = form.getValues('resource_type');
       if (!resourceType || resourceType === 'global') return [];
 
+      // Use type assertion to fix the dynamic table query
+      const validTableNames = ['users', 'communities', 'discussions', 'events', 'tags'] as const;
+      if (!validTableNames.includes(resourceType as any)) return [];
+
       const { data, error } = await supabase
-        .from(resourceType)
+        .from(resourceType as any)
         .select('id, name, title')
         .limit(50);
 
       if (error) throw error;
-      return data;
+      return ((data || []) as unknown) as Array<{ id: string; name?: string; title?: string; }>;
     },
     enabled: showResourceId && form.watch('resource_type') !== 'global'
   });

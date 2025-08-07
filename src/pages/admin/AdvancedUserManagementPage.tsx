@@ -152,12 +152,15 @@ export default function AdvancedUserManagementPage() {
         .from('user_permissions')
         .select(`
           *,
-          users:user_id(name)
+          users!user_permissions_user_id_fkey(name)
         `)
         .order('granted_at', { ascending: false });
 
       if (error) throw error;
-      return data as UserPermission[];
+      return data?.map(permission => ({
+        ...permission,
+        users: permission.users as { name: string }
+      })) as UserPermission[];
     }
   });
 
@@ -166,7 +169,7 @@ export default function AdvancedUserManagementPage() {
     mutationFn: async ({ roleId, updates }: { roleId: string; updates: Partial<UserRole> }) => {
       const { error } = await supabase
         .from('user_roles')
-        .update(updates)
+        .update(updates as any)
         .eq('id', roleId);
 
       if (error) throw error;
@@ -245,10 +248,10 @@ export default function AdvancedUserManagementPage() {
     role.expires_at && new Date(role.expires_at) < new Date()
   ).length || 0;
 
-  const roleColumns: any[] = [
+  const roleColumns = [
     { 
-      key: 'user', 
-      label: 'User',
+      key: 'user' as keyof UserRole, 
+      header: 'User',
       render: (role: UserRole) => (
         <div className="flex items-center space-x-2">
           {role.users?.photo_url && (
@@ -263,8 +266,8 @@ export default function AdvancedUserManagementPage() {
       )
     },
     { 
-      key: 'role', 
-      label: 'Role',
+      key: 'role' as keyof UserRole, 
+      header: 'Role',
       render: (role: UserRole) => {
         const Icon = ROLE_ICONS[role.role as keyof typeof ROLE_ICONS] || Users;
         return (
@@ -278,19 +281,19 @@ export default function AdvancedUserManagementPage() {
       }
     },
     { 
-      key: 'granted_at', 
-      label: 'Granted',
+      key: 'granted_at' as keyof UserRole, 
+      header: 'Granted',
       render: (role: UserRole) => new Date(role.granted_at).toLocaleDateString()
     },
     { 
-      key: 'expires_at', 
-      label: 'Expires',
+      key: 'expires_at' as keyof UserRole, 
+      header: 'Expires',
       render: (role: UserRole) => 
         role.expires_at ? new Date(role.expires_at).toLocaleDateString() : 'Never'
     },
     { 
-      key: 'status', 
-      label: 'Status',
+      key: 'is_active' as keyof UserRole, 
+      header: 'Status',
       render: (role: UserRole) => {
         const isExpired = role.expires_at && new Date(role.expires_at) < new Date();
         return (
@@ -304,8 +307,8 @@ export default function AdvancedUserManagementPage() {
 
   const operationColumns = [
     { 
-      key: 'operation_type', 
-      label: 'Operation',
+      key: 'operation_type' as keyof BulkOperation, 
+      header: 'Operation',
       render: (op: BulkOperation) => (
         <div className="flex items-center space-x-2">
           <Zap className="w-4 h-4" />
@@ -314,13 +317,13 @@ export default function AdvancedUserManagementPage() {
       )
     },
     { 
-      key: 'initiated_by', 
-      label: 'Initiated By',
+      key: 'initiated_by' as keyof BulkOperation, 
+      header: 'Initiated By',
       render: (op: BulkOperation) => op.users?.name || 'Unknown'
     },
     { 
-      key: 'progress', 
-      label: 'Progress',
+      key: 'target_count' as keyof BulkOperation, 
+      header: 'Progress',
       render: (op: BulkOperation) => {
         const progress = op.target_count > 0 
           ? ((op.success_count + op.error_count) / op.target_count) * 100 
@@ -336,8 +339,8 @@ export default function AdvancedUserManagementPage() {
       }
     },
     { 
-      key: 'status', 
-      label: 'Status',
+      key: 'status' as keyof BulkOperation, 
+      header: 'Status',
       render: (op: BulkOperation) => (
         <Badge variant={STATUS_COLORS[op.status as keyof typeof STATUS_COLORS]}>
           {op.status.replace('_', ' ')}
@@ -345,21 +348,21 @@ export default function AdvancedUserManagementPage() {
       )
     },
     { 
-      key: 'started_at', 
-      label: 'Started',
+      key: 'started_at' as keyof BulkOperation, 
+      header: 'Started',
       render: (op: BulkOperation) => new Date(op.started_at).toLocaleString()
     }
   ];
 
   const permissionColumns = [
     { 
-      key: 'user', 
-      label: 'User',
+      key: 'user_id' as keyof UserPermission, 
+      header: 'User',
       render: (perm: UserPermission) => perm.users?.name || 'Unknown'
     },
     { 
-      key: 'permission_type', 
-      label: 'Permission',
+      key: 'permission_type' as keyof UserPermission, 
+      header: 'Permission',
       render: (perm: UserPermission) => (
         <div className="flex items-center space-x-2">
           <Key className="w-4 h-4" />
@@ -368,19 +371,19 @@ export default function AdvancedUserManagementPage() {
       )
     },
     { 
-      key: 'resource', 
-      label: 'Resource',
+      key: 'resource_type' as keyof UserPermission, 
+      header: 'Resource',
       render: (perm: UserPermission) => 
         perm.resource_type ? `${perm.resource_type}${perm.resource_id ? ` (${perm.resource_id.slice(0, 8)}...)` : ''}` : 'Global'
     },
     { 
-      key: 'granted_at', 
-      label: 'Granted',
+      key: 'granted_at' as keyof UserPermission, 
+      header: 'Granted',
       render: (perm: UserPermission) => new Date(perm.granted_at).toLocaleDateString()
     },
     { 
-      key: 'expires_at', 
-      label: 'Expires',
+      key: 'expires_at' as keyof UserPermission, 
+      header: 'Expires',
       render: (perm: UserPermission) => 
         perm.expires_at ? new Date(perm.expires_at).toLocaleDateString() : 'Never'
     }
@@ -483,13 +486,21 @@ export default function AdvancedUserManagementPage() {
               <DataTable
                 data={userRoles || []}
                 columns={roleColumns}
-                searchKey="users.name"
                 isLoading={rolesLoading}
-                onEdit={(role) => {
-                  setSelectedRole(role);
-                  setIsRoleModalOpen(true);
-                }}
-                onDelete={(role) => deleteRoleMutation.mutate(role.id)}
+                actions={[
+                  {
+                    label: "Edit",
+                    onClick: (role) => {
+                      setSelectedRole(role);
+                      setIsRoleModalOpen(true);
+                    }
+                  },
+                  {
+                    label: "Delete",
+                    onClick: (role) => deleteRoleMutation.mutate(role.id),
+                    variant: "destructive" as const
+                  }
+                ]}
               />
             </CardContent>
           </Card>
@@ -520,24 +531,21 @@ export default function AdvancedUserManagementPage() {
               <DataTable
                 data={bulkOperations || []}
                 columns={operationColumns}
-                searchKey="operation_type"
                 isLoading={operationsLoading}
-                onEdit={(operation) => {
-                  setSelectedOperation(operation);
-                  setIsBulkModalOpen(true);
-                }}
-                customActions={(operation) => (
-                  operation.status === 'pending' || operation.status === 'in_progress' ? (
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={() => cancelOperationMutation.mutate(operation.id)}
-                    >
-                      <XCircle className="w-4 h-4 mr-1" />
-                      Cancel
-                    </Button>
-                  ) : null
-                )}
+                actions={[
+                  {
+                    label: "Edit",
+                    onClick: (operation) => {
+                      setSelectedOperation(operation);
+                      setIsBulkModalOpen(true);
+                    }
+                  },
+                  {
+                    label: "Cancel",
+                    onClick: (operation) => cancelOperationMutation.mutate(operation.id),
+                    variant: "destructive" as const
+                  }
+                ]}
               />
             </CardContent>
           </Card>
@@ -568,12 +576,16 @@ export default function AdvancedUserManagementPage() {
               <DataTable
                 data={userPermissions || []}
                 columns={permissionColumns}
-                searchKey="users.name"
                 isLoading={permissionsLoading}
-                onEdit={(permission) => {
-                  setSelectedPermission(permission);
-                  setIsPermissionModalOpen(true);
-                }}
+                actions={[
+                  {
+                    label: "Edit",
+                    onClick: (permission) => {
+                      setSelectedPermission(permission);
+                      setIsPermissionModalOpen(true);
+                    }
+                  }
+                ]}
               />
             </CardContent>
           </Card>
