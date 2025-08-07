@@ -163,8 +163,8 @@ export default function ModerationPage() {
         .from('flags')
         .select(`
           *,
-          flagged_by:users!flags_flagged_by_id_fkey(name, photo_url),
-          flagged_user:users!flags_flagged_user_id_fkey(name, photo_url),
+          flagged_by:users!flags_flagged_by_id_fkey(id, name, photo_url),
+          flagged_user:users!flags_flagged_user_id_fkey(id, name, photo_url),
           comment:discussion_comments(
             text,
             discussion:discussions(
