@@ -6,6 +6,7 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Plus, Shield, UserCheck, UserX, Clock, Award } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
+import { UserModal } from '@/components/admin/UserModal';
 
 interface User {
   id: string;
@@ -149,6 +150,8 @@ const columns: Column<User>[] = [
 export default function UsersPage() {
   const [users, setUsers] = useState<User[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [selectedUser, setSelectedUser] = useState<User | undefined>();
   const { toast } = useToast();
 
   useEffect(() => {
@@ -237,6 +240,20 @@ export default function UsersPage() {
     },
   ];
 
+  const handleEditUser = (user: User) => {
+    setSelectedUser(user);
+    setIsModalOpen(true);
+  };
+
+  const handleCreate = () => {
+    setSelectedUser(undefined);
+    setIsModalOpen(true);
+  };
+
+  const handleModalSuccess = () => {
+    loadUsers();
+  };
+
   const actions = [
     {
       label: 'View Profile',
@@ -249,12 +266,7 @@ export default function UsersPage() {
     },
     {
       label: 'Edit User',
-      onClick: (user: User) => {
-        toast({
-          title: "Edit User",
-          description: `Editing ${user.name} - Feature coming soon!`,
-        });
-      },
+      onClick: handleEditUser,
     },
     {
       label: 'Promote to Admin',
@@ -275,7 +287,7 @@ export default function UsersPage() {
           <h1>Users</h1>
           <p className="text-muted-foreground">Manage platform users and permissions</p>
         </div>
-        <Button className="admin-focus">
+        <Button onClick={handleCreate} className="admin-focus">
           <Plus className="h-4 w-4 mr-2" />
           Add User
         </Button>
@@ -292,6 +304,13 @@ export default function UsersPage() {
         searchPlaceholder="Search users..."
         filters={filters}
         actions={actions}
+      />
+
+      <UserModal
+        isOpen={isModalOpen}
+        onClose={() => setIsModalOpen(false)}
+        onSuccess={handleModalSuccess}
+        user={selectedUser}
       />
     </div>
   );

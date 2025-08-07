@@ -6,6 +6,7 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Plus, MapPin, Users, Calendar } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
+import { CommunityModal } from '@/components/admin/CommunityModal';
 
 interface Community {
   id: string;
@@ -86,6 +87,8 @@ const columns: Column<Community>[] = [
 export default function CommunitiesPage() {
   const [communities, setCommunities] = useState<Community[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [selectedCommunity, setSelectedCommunity] = useState<Community | undefined>();
   const { toast } = useToast();
 
   useEffect(() => {
@@ -128,10 +131,13 @@ export default function CommunitiesPage() {
   };
 
   const handleEdit = (community: Community) => {
-    toast({
-      title: "Edit Community",
-      description: `Editing ${community.name} - Feature coming soon!`,
-    });
+    setSelectedCommunity(community);
+    setIsModalOpen(true);
+  };
+
+  const handleCreate = () => {
+    setSelectedCommunity(undefined);
+    setIsModalOpen(true);
   };
 
   const handleDelete = (community: Community) => {
@@ -140,6 +146,10 @@ export default function CommunitiesPage() {
       description: `Delete ${community.name} - Feature coming soon!`,
       variant: "destructive",
     });
+  };
+
+  const handleModalSuccess = () => {
+    loadCommunities();
   };
 
   const handleExport = () => {
@@ -192,7 +202,7 @@ export default function CommunitiesPage() {
           <h1>Communities</h1>
           <p className="text-muted-foreground">Manage communities across your platform</p>
         </div>
-        <Button className="admin-focus">
+        <Button onClick={handleCreate} className="admin-focus">
           <Plus className="h-4 w-4 mr-2" />
           Add Community
         </Button>
@@ -209,6 +219,13 @@ export default function CommunitiesPage() {
         searchPlaceholder="Search communities..."
         filters={filters}
         actions={actions}
+      />
+
+      <CommunityModal
+        isOpen={isModalOpen}
+        onClose={() => setIsModalOpen(false)}
+        onSuccess={handleModalSuccess}
+        community={selectedCommunity}
       />
     </div>
   );

@@ -6,6 +6,7 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Plus, Calendar, MapPin, Users, DollarSign, Clock } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
+import { EventModal } from '@/components/admin/EventModal';
 
 interface Event {
   id: string;
@@ -16,6 +17,8 @@ interface Event {
   capacity: number;
   price?: number;
   currency?: string;
+  community_id: string;
+  host_id?: string;
   is_cancelled: boolean;
   created_at: string;
   updated_at: string;
@@ -157,6 +160,8 @@ const columns: Column<Event>[] = [
 export default function EventsPage() {
   const [events, setEvents] = useState<Event[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [selectedEvent, setSelectedEvent] = useState<Event | undefined>();
   const { toast } = useToast();
 
   useEffect(() => {
@@ -200,10 +205,17 @@ export default function EventsPage() {
   };
 
   const handleEdit = (event: Event) => {
-    toast({
-      title: "Edit Event",
-      description: `Editing ${event.title} - Feature coming soon!`,
-    });
+    setSelectedEvent(event);
+    setIsModalOpen(true);
+  };
+
+  const handleCreate = () => {
+    setSelectedEvent(undefined);
+    setIsModalOpen(true);
+  };
+
+  const handleModalSuccess = () => {
+    loadEvents();
   };
 
   const handleCancel = (event: Event) => {
@@ -275,7 +287,7 @@ export default function EventsPage() {
           <h1>Events</h1>
           <p className="text-muted-foreground">Manage events across all communities</p>
         </div>
-        <Button className="admin-focus">
+        <Button onClick={handleCreate} className="admin-focus">
           <Plus className="h-4 w-4 mr-2" />
           Create Event
         </Button>
@@ -292,6 +304,13 @@ export default function EventsPage() {
         searchPlaceholder="Search events..."
         filters={filters}
         actions={actions}
+      />
+
+      <EventModal
+        isOpen={isModalOpen}
+        onClose={() => setIsModalOpen(false)}
+        onSuccess={handleModalSuccess}
+        event={selectedEvent}
       />
     </div>
   );

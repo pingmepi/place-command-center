@@ -6,14 +6,17 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Plus, MessageSquare, Eye, EyeOff, Clock, MapPin, User } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
+import { DiscussionModal } from '@/components/admin/DiscussionModal';
 
 interface Discussion {
   id: string;
   title: string;
   prompt?: string;
+  community_id: string;
   expires_at: string;
   is_visible: boolean;
   extended: boolean;
+  created_by: string;
   created_at: string;
   updated_at: string;
   community: {
@@ -144,6 +147,8 @@ const columns: Column<Discussion>[] = [
 export default function DiscussionsPage() {
   const [discussions, setDiscussions] = useState<Discussion[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [selectedDiscussion, setSelectedDiscussion] = useState<Discussion | undefined>();
   const { toast } = useToast();
 
   useEffect(() => {
@@ -242,10 +247,8 @@ export default function DiscussionsPage() {
     {
       label: 'Edit Discussion',
       onClick: (discussion: Discussion) => {
-        toast({
-          title: "Edit Discussion",
-          description: `Editing ${discussion.title} - Feature coming soon!`,
-        });
+        setSelectedDiscussion(discussion);
+        setIsModalOpen(true);
       },
     },
     {
@@ -269,6 +272,15 @@ export default function DiscussionsPage() {
     },
   ];
 
+  const handleCreate = () => {
+    setSelectedDiscussion(undefined);
+    setIsModalOpen(true);
+  };
+
+  const handleModalSuccess = () => {
+    loadDiscussions();
+  };
+
   return (
     <div className="space-y-6">
       {/* Header */}
@@ -277,7 +289,7 @@ export default function DiscussionsPage() {
           <h1>Discussions</h1>
           <p className="text-muted-foreground">Manage community discussions and content</p>
         </div>
-        <Button className="admin-focus">
+        <Button onClick={handleCreate} className="admin-focus">
           <Plus className="h-4 w-4 mr-2" />
           Create Discussion
         </Button>
@@ -294,6 +306,13 @@ export default function DiscussionsPage() {
         searchPlaceholder="Search discussions..."
         filters={filters}
         actions={actions}
+      />
+
+      <DiscussionModal
+        isOpen={isModalOpen}
+        onClose={() => setIsModalOpen(false)}
+        onSuccess={handleModalSuccess}
+        discussion={selectedDiscussion}
       />
     </div>
   );
