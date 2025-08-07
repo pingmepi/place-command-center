@@ -19,6 +19,7 @@ import UsersPage from "@/pages/admin/UsersPage";
 import DiscussionsPage from "@/pages/admin/DiscussionsPage";
 import RegistrationsPage from "@/pages/admin/RegistrationsPage";
 import ModerationPage from "@/pages/admin/ModerationPage";
+import AnalyticsPage from "@/pages/admin/AnalyticsPage";
 
 const queryClient = new QueryClient();
 
@@ -48,7 +49,7 @@ const App = () => (
                 <Route path="discussions" element={<DiscussionsPage />} />
                 <Route path="registrations" element={<RegistrationsPage />} />
                 <Route path="moderation" element={<ModerationPage />} />
-                <Route path="analytics" element={<div>Analytics - Coming Soon</div>} />
+                <Route path="analytics" element={<AnalyticsPage />} />
                 <Route path="settings" element={<div>System Settings - Coming Soon</div>} />
               </Route>
               
