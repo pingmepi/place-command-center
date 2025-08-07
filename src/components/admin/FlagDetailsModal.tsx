@@ -26,11 +26,15 @@ interface FlaggedContent {
   id: string;
   reason: string;
   created_at: string;
+  status: 'open' | 'resolved' | 'urgent';
+  resolved_at?: string;
+  resolved_by?: string;
   flagged_by: {
     name: string;
     photo_url?: string;
   };
   flagged_user: {
+    id: string;
     name: string;
     photo_url?: string;
   };

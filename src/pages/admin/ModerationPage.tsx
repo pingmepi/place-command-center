@@ -12,11 +12,15 @@ interface Flag {
   id: string;
   reason: string;
   created_at: string;
+  status: 'open' | 'resolved' | 'urgent';
+  resolved_at?: string;
+  resolved_by?: string;
   flagged_by: {
     name: string;
     photo_url?: string;
   };
   flagged_user: {
+    id: string;
     name: string;
     photo_url?: string;
   };
@@ -39,14 +43,27 @@ const columns: Column<Flag>[] = [
     filterable: true,
     render: (value, row) => (
       <div className="flex items-center gap-3">
-        <div className="w-10 h-10 bg-destructive/10 rounded-lg flex items-center justify-center">
-          <Flag className="h-5 w-5 text-destructive" />
+        <div className={`w-10 h-10 rounded-lg flex items-center justify-center ${
+          row.status === 'urgent' ? 'bg-red-100 text-red-600' :
+          row.status === 'resolved' ? 'bg-green-100 text-green-600' :
+          'bg-orange-100 text-orange-600'
+        }`}>
+          <Flag className="h-5 w-5" />
         </div>
         <div>
           <p className="font-medium">{value}</p>
-          <p className="text-sm text-muted-foreground">
-            Flag #{row.id.slice(0, 8)}...
-          </p>
+          <div className="flex items-center gap-2">
+            <p className="text-sm text-muted-foreground">
+              Flag #{row.id.slice(0, 8)}...
+            </p>
+            <Badge variant={
+              row.status === 'urgent' ? 'destructive' :
+              row.status === 'resolved' ? 'default' :
+              'secondary'
+            } className="text-xs">
+              {row.status}
+            </Badge>
+          </div>
         </div>
       </div>
     ),
@@ -180,10 +197,13 @@ export default function ModerationPage() {
 
   const handleResolveFlag = async (flag: Flag) => {
     try {
-      // Simulate resolving the flag by deleting it
       const { error } = await supabase
         .from('flags')
-        .delete()
+        .update({ 
+          status: 'resolved',
+          resolved_at: new Date().toISOString(),
+          resolved_by: (await supabase.auth.getUser()).data.user?.id
+        })
         .eq('id', flag.id);
 
       if (error) throw error;
@@ -193,7 +213,6 @@ export default function ModerationPage() {
         description: `Flag has been resolved successfully.`,
       });
       
-      // Refresh the flags list
       loadFlags();
     } catch (error) {
       console.error('Error resolving flag:', error);
@@ -205,11 +224,33 @@ export default function ModerationPage() {
     }
   };
 
-  const handleDismissFlag = (flag: Flag) => {
-    toast({
-      title: "Dismiss Flag",
-      description: `Flag dismissed - Feature coming soon!`,
-    });
+  const handleDismissFlag = async (flag: Flag) => {
+    try {
+      const { error } = await supabase
+        .from('flags')
+        .update({ 
+          status: 'resolved',
+          resolved_at: new Date().toISOString(),
+          resolved_by: (await supabase.auth.getUser()).data.user?.id
+        })
+        .eq('id', flag.id);
+
+      if (error) throw error;
+
+      toast({
+        title: "Flag Dismissed",
+        description: `Flag has been dismissed successfully.`,
+      });
+      
+      loadFlags();
+    } catch (error) {
+      console.error('Error dismissing flag:', error);
+      toast({
+        title: "Error", 
+        description: "Failed to dismiss flag.",
+        variant: "destructive",
+      });
+    }
   };
 
   const handleBanUser = (flag: Flag) => {
@@ -227,17 +268,54 @@ export default function ModerationPage() {
     });
   };
 
-  // Get unique reasons for filtering
+  const handleMarkUrgent = async (flag: Flag) => {
+    try {
+      const { error } = await supabase
+        .from('flags')
+        .update({ status: 'urgent' })
+        .eq('id', flag.id);
+
+      if (error) throw error;
+
+      toast({
+        title: "Flag Marked Urgent",
+        description: `Flag has been marked as urgent.`,
+        variant: "destructive",
+      });
+      
+      loadFlags();
+    } catch (error) {
+      console.error('Error marking flag urgent:', error);
+      toast({
+        title: "Error",
+        description: "Failed to mark flag as urgent.",
+        variant: "destructive",
+      });
+    }
+  };
+
+  // Get unique reasons and statuses for filtering
   const reasons = [...new Set(flags.map(f => f.reason))].map(reason => ({
     value: reason,
     label: reason,
   }));
+
+  const statuses = [
+    { value: 'open', label: 'Open' },
+    { value: 'resolved', label: 'Resolved' },
+    { value: 'urgent', label: 'Urgent' },
+  ];
 
   const filters = [
     {
       key: 'reason' as keyof Flag,
       label: 'Reason',
       options: reasons,
+    },
+    {
+      key: 'status' as keyof Flag,
+      label: 'Status',
+      options: statuses,
     },
   ];
 
@@ -259,12 +337,20 @@ export default function ModerationPage() {
       },
     },
     {
+      label: 'Mark Urgent',
+      onClick: handleMarkUrgent,
+      variant: 'destructive' as const,
+      show: (flag: Flag) => flag.status !== 'urgent',
+    },
+    {
       label: 'Resolve Flag',
       onClick: handleResolveFlag,
+      show: (flag: Flag) => flag.status !== 'resolved',
     },
     {
       label: 'Dismiss Flag',
       onClick: handleDismissFlag,
+      show: (flag: Flag) => flag.status !== 'resolved',
     },
     {
       label: 'Ban User',
@@ -290,27 +376,40 @@ export default function ModerationPage() {
       </div>
 
       {/* Moderation Stats */}
-      <div className="grid gap-4 md:grid-cols-3">
+      <div className="grid gap-4 md:grid-cols-4">
         <div className="bg-card p-4 rounded-lg border">
           <div className="flex items-center gap-2 mb-2">
-            <Flag className="h-5 w-5 text-destructive" />
-            <h3 className="font-medium">Total Flags</h3>
+            <Flag className="h-5 w-5 text-orange-500" />
+            <h3 className="font-medium">Open Flags</h3>
           </div>
-          <p className="text-2xl font-bold">{flags.length}</p>
+          <p className="text-2xl font-bold">{flags.filter(f => f.status === 'open').length}</p>
+        </div>
+        <div className="bg-card p-4 rounded-lg border">
+          <div className="flex items-center gap-2 mb-2">
+            <AlertTriangle className="h-5 w-5 text-red-500" />
+            <h3 className="font-medium">Urgent Flags</h3>
+          </div>
+          <p className="text-2xl font-bold">{flags.filter(f => f.status === 'urgent').length}</p>
         </div>
         <div className="bg-card p-4 rounded-lg border">
           <div className="flex items-center gap-2 mb-2">
             <CheckCircle className="h-5 w-5 text-success" />
             <h3 className="font-medium">Resolved Today</h3>
           </div>
-          <p className="text-2xl font-bold">0</p>
+          <p className="text-2xl font-bold">
+            {flags.filter(f => 
+              f.status === 'resolved' && 
+              f.resolved_at && 
+              new Date(f.resolved_at).toDateString() === new Date().toDateString()
+            ).length}
+          </p>
         </div>
         <div className="bg-card p-4 rounded-lg border">
           <div className="flex items-center gap-2 mb-2">
             <XCircle className="h-5 w-5 text-muted-foreground" />
-            <h3 className="font-medium">Dismissed Today</h3>
+            <h3 className="font-medium">Total Flags</h3>
           </div>
-          <p className="text-2xl font-bold">0</p>
+          <p className="text-2xl font-bold">{flags.length}</p>
         </div>
       </div>
 

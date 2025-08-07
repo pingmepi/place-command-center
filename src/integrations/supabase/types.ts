@@ -388,6 +388,9 @@ export type Database = {
           flagged_user_id: string
           id: string
           reason: string
+          resolved_at: string | null
+          resolved_by: string | null
+          status: Database["public"]["Enums"]["flag_status"]
         }
         Insert: {
           comment_id?: string | null
@@ -396,6 +399,9 @@ export type Database = {
           flagged_user_id: string
           id?: string
           reason: string
+          resolved_at?: string | null
+          resolved_by?: string | null
+          status?: Database["public"]["Enums"]["flag_status"]
         }
         Update: {
           comment_id?: string | null
@@ -404,6 +410,9 @@ export type Database = {
           flagged_user_id?: string
           id?: string
           reason?: string
+          resolved_at?: string | null
+          resolved_by?: string | null
+          status?: Database["public"]["Enums"]["flag_status"]
         }
         Relationships: [
           {
@@ -940,6 +949,7 @@ export type Database = {
         | "community_manager"
         | "event_organizer"
         | "user"
+      flag_status: "open" | "resolved" | "urgent"
       registration_status: "pending" | "success" | "failed" | "cancelled"
       user_role: "user" | "admin"
     }
@@ -1076,6 +1086,7 @@ export const Constants = {
         "event_organizer",
         "user",
       ],
+      flag_status: ["open", "resolved", "urgent"],
       registration_status: ["pending", "success", "failed", "cancelled"],
       user_role: ["user", "admin"],
     },
