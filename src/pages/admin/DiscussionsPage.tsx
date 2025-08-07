@@ -236,12 +236,9 @@ export default function DiscussionsPage() {
 
   const actions = [
     {
-      label: 'View Comments',
+      label: 'View Discussion',
       onClick: (discussion: Discussion) => {
-        toast({
-          title: "View Comments",
-          description: `Viewing comments for ${discussion.title}`,
-        });
+        window.open(`/admin/discussions/${discussion.id}`, '_blank');
       },
     },
     {

@@ -14,9 +14,11 @@ import { AdminLayout } from "@/components/admin/AdminLayout";
 import { ProtectedAdminRoute } from "@/components/admin/ProtectedAdminRoute";
 import AdminDashboard from "@/pages/admin/AdminDashboard";
 import CommunitiesPage from "@/pages/admin/CommunitiesPage";
+import CommunityDetailsPage from "@/pages/admin/CommunityDetailsPage";
 import EventsPage from "@/pages/admin/EventsPage";
 import UsersPage from "@/pages/admin/UsersPage";
 import DiscussionsPage from "@/pages/admin/DiscussionsPage";
+import DiscussionDetailsPage from "@/pages/admin/DiscussionDetailsPage";
 import RegistrationsPage from "@/pages/admin/RegistrationsPage";
 import ModerationPage from "@/pages/admin/ModerationPage";
 import AnalyticsPage from "@/pages/admin/AnalyticsPage";
@@ -45,9 +47,11 @@ const App = () => (
               }>
                 <Route index element={<AdminDashboard />} />
                 <Route path="communities" element={<CommunitiesPage />} />
+                <Route path="communities/:id" element={<CommunityDetailsPage />} />
                 <Route path="events" element={<EventsPage />} />
                 <Route path="users" element={<UsersPage />} />
                 <Route path="discussions" element={<DiscussionsPage />} />
+                <Route path="discussions/:id" element={<DiscussionDetailsPage />} />
                 <Route path="registrations" element={<RegistrationsPage />} />
                 <Route path="moderation" element={<ModerationPage />} />
                 <Route path="analytics" element={<AnalyticsPage />} />

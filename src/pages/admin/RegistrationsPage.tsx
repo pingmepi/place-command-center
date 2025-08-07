@@ -6,6 +6,7 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Download, Calendar, User, CreditCard, Clock, MapPin } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
+import { RegistrationDetailsModal } from '@/components/admin/RegistrationDetailsModal';
 
 interface Registration {
   id: string;
@@ -138,6 +139,8 @@ const columns: Column<Registration>[] = [
 export default function RegistrationsPage() {
   const [registrations, setRegistrations] = useState<Registration[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [selectedRegistration, setSelectedRegistration] = useState<Registration | null>(null);
+  const [isDetailsModalOpen, setIsDetailsModalOpen] = useState(false);
   const { toast } = useToast();
 
   useEffect(() => {
@@ -225,15 +228,34 @@ export default function RegistrationsPage() {
     },
   ];
 
+  const handleViewDetails = (registration: Registration) => {
+    // Transform to match RegistrationDetailsModal interface
+    const transformedRegistration = {
+      id: registration.id,
+      user: {
+        name: registration.user.name,
+        email: `user@example.com`, // Placeholder
+        photo_url: registration.user.photo_url,
+      },
+      event: {
+        title: registration.event.title,
+        date_time: registration.event.date_time,
+        venue: registration.event.venue,
+      },
+      status: registration.status === 'success' ? 'confirmed' : 
+              registration.status === 'failed' ? 'cancelled' : 'pending',
+      payment_status: registration.status === 'success' ? 'paid' : 'pending',
+      payment_id: registration.payment_id,
+      registered_at: registration.created_at,
+    };
+    setSelectedRegistration(transformedRegistration as any);
+    setIsDetailsModalOpen(true);
+  };
+
   const actions = [
     {
       label: 'View Details',
-      onClick: (registration: Registration) => {
-        toast({
-          title: "View Details",
-          description: `Viewing details for ${registration.user.name}`,
-        });
-      },
+      onClick: handleViewDetails,
     },
     {
       label: 'Contact User',
@@ -280,6 +302,12 @@ export default function RegistrationsPage() {
         searchPlaceholder="Search registrations..."
         filters={filters}
         actions={actions}
+      />
+
+      <RegistrationDetailsModal
+        isOpen={isDetailsModalOpen}
+        onClose={() => setIsDetailsModalOpen(false)}
+        registration={selectedRegistration}
       />
     </div>
   );

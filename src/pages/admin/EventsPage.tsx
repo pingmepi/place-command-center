@@ -7,6 +7,7 @@ import { Plus, Calendar, MapPin, Users, DollarSign, Clock } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { EventModal } from '@/components/admin/EventModal';
+import { EventRegistrationsModal } from '@/components/admin/EventRegistrationsModal';
 
 interface Event {
   id: string;
@@ -166,6 +167,8 @@ export default function EventsPage() {
   const [isLoading, setIsLoading] = useState(true);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedEvent, setSelectedEvent] = useState<Event | undefined>();
+  const [isRegistrationsModalOpen, setIsRegistrationsModalOpen] = useState(false);
+  const [selectedEventForRegistrations, setSelectedEventForRegistrations] = useState<Event | null>(null);
   const { toast } = useToast();
 
   useEffect(() => {
@@ -270,10 +273,8 @@ export default function EventsPage() {
     {
       label: 'View Registrations',
       onClick: (event: Event) => {
-        toast({
-          title: "View Registrations",
-          description: `Viewing registrations for ${event.title}`,
-        });
+        setSelectedEventForRegistrations(event);
+        setIsRegistrationsModalOpen(true);
       },
     },
     {
@@ -315,6 +316,13 @@ export default function EventsPage() {
         onClose={() => setIsModalOpen(false)}
         onSuccess={handleModalSuccess}
         event={selectedEvent}
+      />
+
+      <EventRegistrationsModal
+        isOpen={isRegistrationsModalOpen}
+        onClose={() => setIsRegistrationsModalOpen(false)}
+        eventId={selectedEventForRegistrations?.id || null}
+        eventTitle={selectedEventForRegistrations?.title || ''}
       />
     </div>
   );
