@@ -16,6 +16,7 @@ import {
 } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
+import { useNavigate } from 'react-router-dom';
 
 interface DashboardStats {
   totalUsers: number;
@@ -25,6 +26,12 @@ interface DashboardStats {
   recentUsers: number;
   recentEvents: number;
   recentRegistrations: number;
+}
+
+interface SystemStatus {
+  database: 'operational' | 'warning' | 'error';
+  auth: 'operational' | 'warning' | 'error';
+  storage: 'operational' | 'warning' | 'error';
 }
 
 interface RecentActivity {
@@ -73,8 +80,14 @@ const StatCard = ({
 export default function AdminDashboard() {
   const [stats, setStats] = useState<DashboardStats | null>(null);
   const [recentActivity, setRecentActivity] = useState<RecentActivity[]>([]);
+  const [systemStatus, setSystemStatus] = useState<SystemStatus>({
+    database: 'operational',
+    auth: 'operational',
+    storage: 'operational'
+  });
   const [isLoading, setIsLoading] = useState(true);
   const { toast } = useToast();
+  const navigate = useNavigate();
 
   useEffect(() => {
     loadDashboardData();
@@ -140,8 +153,22 @@ export default function AdminDashboard() {
 
       setRecentActivity(formattedActivity);
 
+      // Check system status
+      const dbHealthy = !usersResult.error && !communitiesResult.error;
+      const authHealthy = true; // If we're here, auth is working
+      setSystemStatus({
+        database: dbHealthy ? 'operational' : 'error',
+        auth: authHealthy ? 'operational' : 'warning',
+        storage: 'operational' // Assuming storage is fine for now
+      });
+
     } catch (error) {
       console.error('Error loading dashboard data:', error);
+      setSystemStatus({
+        database: 'error',
+        auth: 'warning',
+        storage: 'warning'
+      });
       toast({
         title: "Error Loading Dashboard",
         description: "Failed to load dashboard statistics.",
@@ -217,9 +244,9 @@ export default function AdminDashboard() {
             <Activity className="h-4 w-4 mr-2" />
             Refresh
           </Button>
-          <Button className="admin-focus">
+          <Button onClick={() => navigate('/admin/communities')} className="admin-focus">
             <Plus className="h-4 w-4 mr-2" />
-            Quick Action
+            Add Community
           </Button>
         </div>
       </div>
@@ -283,7 +310,11 @@ export default function AdminDashboard() {
                 ))
               )}
               {recentActivity.length > 6 && (
-                <Button variant="ghost" className="w-full admin-focus">
+                <Button 
+                  variant="ghost" 
+                  className="w-full admin-focus"
+                  onClick={() => navigate('/admin/analytics')}
+                >
                   View All Activity
                   <ArrowUpRight className="h-4 w-4 ml-2" />
                 </Button>
@@ -299,19 +330,35 @@ export default function AdminDashboard() {
             <CardDescription>Common administrative tasks</CardDescription>
           </CardHeader>
           <CardContent className="space-y-3">
-            <Button variant="outline" className="w-full justify-start admin-focus">
+            <Button 
+              variant="outline" 
+              className="w-full justify-start admin-focus"
+              onClick={() => navigate('/admin/users')}
+            >
               <Users className="h-4 w-4 mr-2" />
               Manage Users
             </Button>
-            <Button variant="outline" className="w-full justify-start admin-focus">
+            <Button 
+              variant="outline" 
+              className="w-full justify-start admin-focus"
+              onClick={() => navigate('/admin/events')}
+            >
               <Calendar className="h-4 w-4 mr-2" />
               Create Event
             </Button>
-            <Button variant="outline" className="w-full justify-start admin-focus">
+            <Button 
+              variant="outline" 
+              className="w-full justify-start admin-focus"
+              onClick={() => navigate('/admin/communities')}
+            >
               <MapPin className="h-4 w-4 mr-2" />
               Add Community
             </Button>
-            <Button variant="outline" className="w-full justify-start admin-focus">
+            <Button 
+              variant="outline" 
+              className="w-full justify-start admin-focus"
+              onClick={() => navigate('/admin/moderation')}
+            >
               <AlertCircle className="h-4 w-4 mr-2" />
               View Flags
             </Button>
@@ -328,24 +375,42 @@ export default function AdminDashboard() {
         <CardContent>
           <div className="grid gap-4 md:grid-cols-3">
             <div className="flex items-center gap-3">
-              <div className="w-3 h-3 bg-success rounded-full" />
+              <div className={`w-3 h-3 rounded-full ${
+                systemStatus.database === 'operational' ? 'bg-success' :
+                systemStatus.database === 'warning' ? 'bg-warning' : 'bg-destructive'
+              }`} />
               <div>
                 <p className="text-sm font-medium">Database</p>
-                <p className="text-xs text-muted-foreground">Operational</p>
+                <p className="text-xs text-muted-foreground">
+                  {systemStatus.database === 'operational' ? 'Operational' :
+                   systemStatus.database === 'warning' ? 'Warning' : 'Error'}
+                </p>
               </div>
             </div>
             <div className="flex items-center gap-3">
-              <div className="w-3 h-3 bg-success rounded-full" />
+              <div className={`w-3 h-3 rounded-full ${
+                systemStatus.auth === 'operational' ? 'bg-success' :
+                systemStatus.auth === 'warning' ? 'bg-warning' : 'bg-destructive'
+              }`} />
               <div>
                 <p className="text-sm font-medium">Authentication</p>
-                <p className="text-xs text-muted-foreground">All systems normal</p>
+                <p className="text-xs text-muted-foreground">
+                  {systemStatus.auth === 'operational' ? 'All systems normal' :
+                   systemStatus.auth === 'warning' ? 'Minor issues' : 'Service disrupted'}
+                </p>
               </div>
             </div>
             <div className="flex items-center gap-3">
-              <div className="w-3 h-3 bg-warning rounded-full" />
+              <div className={`w-3 h-3 rounded-full ${
+                systemStatus.storage === 'operational' ? 'bg-success' :
+                systemStatus.storage === 'warning' ? 'bg-warning' : 'bg-destructive'
+              }`} />
               <div>
                 <p className="text-sm font-medium">Storage</p>
-                <p className="text-xs text-muted-foreground">85% capacity</p>
+                <p className="text-xs text-muted-foreground">
+                  {systemStatus.storage === 'operational' ? 'Available' :
+                   systemStatus.storage === 'warning' ? '85% capacity' : 'Storage error'}
+                </p>
               </div>
             </div>
           </div>
