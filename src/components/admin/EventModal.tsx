@@ -321,6 +321,11 @@ export function EventModal({ isOpen, onClose, onSuccess, event }: EventModalProp
                               const newDate = new Date(field.value);
                               newDate.setHours(parseInt(hours), parseInt(minutes));
                               field.onChange(newDate);
+                            } else if (!field.value && e.target.value) {
+                              const [hours, minutes] = e.target.value.split(':');
+                              const newDate = new Date();
+                              newDate.setHours(parseInt(hours), parseInt(minutes));
+                              field.onChange(newDate);
                             }
                           }}
                           value={field.value ? format(field.value, "HH:mm") : ""}
