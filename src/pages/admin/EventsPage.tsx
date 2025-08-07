@@ -17,6 +17,7 @@ interface Event {
   capacity: number;
   price?: number;
   currency?: string;
+  image_url?: string;
   community_id: string;
   host_id?: string;
   is_cancelled: boolean;
@@ -41,9 +42,12 @@ const columns: Column<Event>[] = [
     sortable: true,
     render: (value, row) => (
       <div className="flex items-center gap-3">
-        <div className="w-10 h-10 bg-primary/10 rounded-lg flex items-center justify-center">
-          <Calendar className="h-5 w-5 text-primary" />
-        </div>
+        <Avatar className="h-10 w-10">
+          <AvatarImage src={row.image_url} />
+          <AvatarFallback>
+            <Calendar className="h-5 w-5" />
+          </AvatarFallback>
+        </Avatar>
         <div>
           <p className="font-medium">{row.title}</p>
           <p className="text-sm text-muted-foreground truncate max-w-[200px]">

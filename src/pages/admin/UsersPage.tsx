@@ -25,6 +25,25 @@ interface User {
 
 const columns: Column<User>[] = [
   {
+    key: 'photo_url',
+    header: 'Avatar',
+    render: (user: User) => (
+      user.photo_url ? (
+        <img 
+          src={user.photo_url} 
+          alt={user.name}
+          className="w-10 h-10 rounded-full object-cover"
+        />
+      ) : (
+        <div className="w-10 h-10 rounded-full bg-muted flex items-center justify-center">
+          <span className="text-xs text-muted-foreground">
+            {user.name.charAt(0).toUpperCase()}
+          </span>
+        </div>
+      )
+    ),
+  },
+  {
     key: 'name',
     header: 'User',
     sortable: true,

@@ -11,6 +11,7 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage, FormDes
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { Loader2 } from 'lucide-react';
+import { FileUpload } from '@/components/ui/file-upload';
 
 const userSchema = z.object({
   name: z.string().min(1, 'Name is required').max(100, 'Name must be less than 100 characters'),
@@ -133,9 +134,14 @@ export function UserModal({ isOpen, onClose, onSuccess, user }: UserModalProps) 
               name="photo_url"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Photo URL</FormLabel>
                   <FormControl>
-                    <Input placeholder="Enter photo URL (optional)" {...field} />
+                    <FileUpload
+                      bucket="user-avatars"
+                      path={user?.id || 'temp'}
+                      onUpload={field.onChange}
+                      currentImage={field.value}
+                      label="Profile Picture"
+                    />
                   </FormControl>
                   <FormMessage />
                 </FormItem>

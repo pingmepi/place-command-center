@@ -9,13 +9,14 @@ import { Textarea } from '@/components/ui/textarea';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
+import { FileUpload } from '@/components/ui/file-upload';
 import { Loader2 } from 'lucide-react';
 
 const communitySchema = z.object({
   name: z.string().min(1, 'Name is required').max(100, 'Name must be less than 100 characters'),
   city: z.string().min(1, 'City is required').max(50, 'City must be less than 50 characters'),
   description: z.string().optional(),
-  image_url: z.string().url('Must be a valid URL').optional().or(z.literal('')),
+  image_url: z.string().optional(),
 });
 
 type CommunityFormData = z.infer<typeof communitySchema>;
@@ -161,9 +162,14 @@ export function CommunityModal({ isOpen, onClose, onSuccess, community }: Commun
               name="image_url"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Image URL</FormLabel>
                   <FormControl>
-                    <Input placeholder="Enter image URL (optional)" {...field} />
+                    <FileUpload
+                      bucket="community-images"
+                      path="communities"
+                      onUpload={field.onChange}
+                      currentImage={field.value}
+                      label="Community Image"
+                    />
                   </FormControl>
                   <FormMessage />
                 </FormItem>

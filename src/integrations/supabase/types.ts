@@ -182,6 +182,7 @@ export type Database = {
           event_id: string
           id: string
           payment_id: string | null
+          payment_session_id: string | null
           status: Database["public"]["Enums"]["registration_status"]
           updated_at: string
           user_id: string
@@ -191,6 +192,7 @@ export type Database = {
           event_id: string
           id?: string
           payment_id?: string | null
+          payment_session_id?: string | null
           status?: Database["public"]["Enums"]["registration_status"]
           updated_at?: string
           user_id: string
@@ -200,6 +202,7 @@ export type Database = {
           event_id?: string
           id?: string
           payment_id?: string | null
+          payment_session_id?: string | null
           status?: Database["public"]["Enums"]["registration_status"]
           updated_at?: string
           user_id?: string
@@ -210,6 +213,13 @@ export type Database = {
             columns: ["event_id"]
             isOneToOne: false
             referencedRelation: "events"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "event_registrations_payment_session_id_fkey"
+            columns: ["payment_session_id"]
+            isOneToOne: false
+            referencedRelation: "payment_sessions"
             referencedColumns: ["id"]
           },
           {
@@ -256,11 +266,14 @@ export type Database = {
           capacity: number
           community_id: string
           created_at: string
+          currency: string | null
           date_time: string
           description: string | null
           host_id: string | null
           id: string
+          image_url: string | null
           is_cancelled: boolean
+          price: number | null
           title: string
           updated_at: string
           venue: string
@@ -269,11 +282,14 @@ export type Database = {
           capacity: number
           community_id: string
           created_at?: string
+          currency?: string | null
           date_time: string
           description?: string | null
           host_id?: string | null
           id?: string
+          image_url?: string | null
           is_cancelled?: boolean
+          price?: number | null
           title: string
           updated_at?: string
           venue: string
@@ -282,11 +298,14 @@ export type Database = {
           capacity?: number
           community_id?: string
           created_at?: string
+          currency?: string | null
           date_time?: string
           description?: string | null
           host_id?: string | null
           id?: string
+          image_url?: string | null
           is_cancelled?: boolean
+          price?: number | null
           title?: string
           updated_at?: string
           venue?: string
@@ -391,6 +410,86 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      payment_logs: {
+        Row: {
+          cashfree_signature: string | null
+          created_at: string
+          event_data: Json | null
+          event_type: string
+          id: string
+          payment_session_id: string
+        }
+        Insert: {
+          cashfree_signature?: string | null
+          created_at?: string
+          event_data?: Json | null
+          event_type: string
+          id?: string
+          payment_session_id: string
+        }
+        Update: {
+          cashfree_signature?: string | null
+          created_at?: string
+          event_data?: Json | null
+          event_type?: string
+          id?: string
+          payment_session_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "payment_logs_payment_session_id_fkey"
+            columns: ["payment_session_id"]
+            isOneToOne: false
+            referencedRelation: "payment_sessions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      payment_sessions: {
+        Row: {
+          amount: number
+          cashfree_order_id: string | null
+          cashfree_payment_id: string | null
+          created_at: string
+          currency: string
+          event_id: string
+          expires_at: string
+          id: string
+          payment_url: string | null
+          status: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          amount: number
+          cashfree_order_id?: string | null
+          cashfree_payment_id?: string | null
+          created_at?: string
+          currency?: string
+          event_id: string
+          expires_at?: string
+          id?: string
+          payment_url?: string | null
+          status?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          amount?: number
+          cashfree_order_id?: string | null
+          cashfree_payment_id?: string | null
+          created_at?: string
+          currency?: string
+          event_id?: string
+          expires_at?: string
+          id?: string
+          payment_url?: string | null
+          status?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
       }
       referrals: {
         Row: {
@@ -557,11 +656,101 @@ export type Database = {
           },
         ]
       }
+      webhook_configurations: {
+        Row: {
+          created_at: string
+          created_by: string
+          events: string[]
+          id: string
+          is_active: boolean
+          name: string
+          secret_key: string | null
+          updated_at: string
+          url: string
+        }
+        Insert: {
+          created_at?: string
+          created_by: string
+          events: string[]
+          id?: string
+          is_active?: boolean
+          name: string
+          secret_key?: string | null
+          updated_at?: string
+          url: string
+        }
+        Update: {
+          created_at?: string
+          created_by?: string
+          events?: string[]
+          id?: string
+          is_active?: boolean
+          name?: string
+          secret_key?: string | null
+          updated_at?: string
+          url?: string
+        }
+        Relationships: []
+      }
+      webhook_deliveries: {
+        Row: {
+          attempts: number
+          created_at: string
+          error_message: string | null
+          event_type: string
+          id: string
+          last_attempt_at: string | null
+          payload: Json
+          response_body: string | null
+          response_status: number | null
+          status: string
+          webhook_config_id: string
+        }
+        Insert: {
+          attempts?: number
+          created_at?: string
+          error_message?: string | null
+          event_type: string
+          id?: string
+          last_attempt_at?: string | null
+          payload: Json
+          response_body?: string | null
+          response_status?: number | null
+          status?: string
+          webhook_config_id: string
+        }
+        Update: {
+          attempts?: number
+          created_at?: string
+          error_message?: string | null
+          event_type?: string
+          id?: string
+          last_attempt_at?: string | null
+          payload?: Json
+          response_body?: string | null
+          response_status?: number | null
+          status?: string
+          webhook_config_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "webhook_deliveries_webhook_config_id_fkey"
+            columns: ["webhook_config_id"]
+            isOneToOne: false
+            referencedRelation: "webhook_configurations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Views: {
       [_ in never]: never
     }
     Functions: {
+      dispatch_webhook: {
+        Args: { event_type: string; event_data: Json; actor_user_id?: string }
+        Returns: undefined
+      }
       generate_referral_code: {
         Args: Record<PropertyKey, never>
         Returns: string

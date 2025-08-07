@@ -14,6 +14,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { Loader2, Calendar as CalendarIcon } from 'lucide-react';
 import { format } from 'date-fns';
+import { FileUpload } from '@/components/ui/file-upload';
 import { cn } from '@/lib/utils';
 
 const eventSchema = z.object({
@@ -26,6 +27,7 @@ const eventSchema = z.object({
   capacity: z.number().min(1, 'Capacity must be at least 1').max(10000, 'Capacity must be less than 10,000'),
   price: z.number().min(0, 'Price cannot be negative').optional(),
   currency: z.string().optional(),
+  image_url: z.string().optional(),
   community_id: z.string().min(1, 'Community is required'),
   host_id: z.string().optional(),
 });
@@ -41,6 +43,7 @@ interface Event {
   capacity: number;
   price?: number;
   currency?: string;
+  image_url?: string;
   community_id: string;
   host_id?: string;
 }
@@ -79,6 +82,7 @@ export function EventModal({ isOpen, onClose, onSuccess, event }: EventModalProp
       capacity: event?.capacity || 50,
       price: event?.price || 0,
       currency: event?.currency || 'INR',
+      image_url: event?.image_url || '',
       community_id: event?.community_id || '',
       host_id: event?.host_id || '',
     },
@@ -152,6 +156,7 @@ export function EventModal({ isOpen, onClose, onSuccess, event }: EventModalProp
             capacity: eventData.capacity,
             price: eventData.price,
             currency: eventData.currency,
+            image_url: eventData.image_url || null,
             community_id: eventData.community_id,
             host_id: eventData.host_id,
           }]);
@@ -332,6 +337,25 @@ export function EventModal({ isOpen, onClose, onSuccess, event }: EventModalProp
                       </div>
                     </PopoverContent>
                   </Popover>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            <FormField
+              control={form.control}
+              name="image_url"
+              render={({ field }) => (
+                <FormItem>
+                  <FormControl>
+                    <FileUpload
+                      bucket="event-images"
+                      path="events"
+                      onUpload={field.onChange}
+                      currentImage={field.value}
+                      label="Event Image"
+                    />
+                  </FormControl>
                   <FormMessage />
                 </FormItem>
               )}
