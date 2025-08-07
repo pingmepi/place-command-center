@@ -238,7 +238,7 @@ export default function DiscussionsPage() {
     {
       label: 'View Discussion',
       onClick: (discussion: Discussion) => {
-        window.open(`/admin/discussions/${discussion.id}`, '_blank');
+        window.location.href = `/admin/discussions/${discussion.id}`;
       },
     },
     {

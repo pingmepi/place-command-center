@@ -8,6 +8,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { EventModal } from '@/components/admin/EventModal';
 import { EventRegistrationsModal } from '@/components/admin/EventRegistrationsModal';
+import { EventDetailsModal } from '@/components/admin/EventDetailsModal';
 
 interface Event {
   id: string;
@@ -168,7 +169,7 @@ export default function EventsPage() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedEvent, setSelectedEvent] = useState<Event | undefined>();
   const [isRegistrationsModalOpen, setIsRegistrationsModalOpen] = useState(false);
-  const [selectedEventForRegistrations, setSelectedEventForRegistrations] = useState<Event | null>(null);
+  const [isEventDetailsModalOpen, setIsEventDetailsModalOpen] = useState(false);
   const { toast } = useToast();
 
   useEffect(() => {
@@ -267,15 +268,22 @@ export default function EventsPage() {
 
   const actions = [
     {
-      label: 'Edit Event',
-      onClick: handleEdit,
+      label: 'View Event Details',
+      onClick: (event: Event) => {
+        setSelectedEvent(event);
+        setIsEventDetailsModalOpen(true);
+      },
     },
     {
       label: 'View Registrations',
       onClick: (event: Event) => {
-        setSelectedEventForRegistrations(event);
+        setSelectedEvent(event);
         setIsRegistrationsModalOpen(true);
       },
+    },
+    {
+      label: 'Edit Event',
+      onClick: handleEdit,
     },
     {
       label: 'Cancel Event',
@@ -321,8 +329,15 @@ export default function EventsPage() {
       <EventRegistrationsModal
         isOpen={isRegistrationsModalOpen}
         onClose={() => setIsRegistrationsModalOpen(false)}
-        eventId={selectedEventForRegistrations?.id || null}
-        eventTitle={selectedEventForRegistrations?.title || ''}
+        eventId={selectedEvent?.id || ''}
+        eventTitle={selectedEvent?.title || ''}
+      />
+
+      <EventDetailsModal
+        isOpen={isEventDetailsModalOpen}
+        onClose={() => setIsEventDetailsModalOpen(false)}
+        event={selectedEvent || null}
+        onSuccess={loadEvents}
       />
     </div>
   );

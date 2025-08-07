@@ -1,5 +1,5 @@
 import React from 'react';
-import { Navigate } from 'react-router-dom';
+import { Navigate, useLocation } from 'react-router-dom';
 import { useAdminAuth } from './AdminAuthProvider';
 import { Shield } from 'lucide-react';
 
@@ -9,6 +9,7 @@ interface ProtectedAdminRouteProps {
 
 export function ProtectedAdminRoute({ children }: ProtectedAdminRouteProps) {
   const { user, isAdmin, isLoading } = useAdminAuth();
+  const location = useLocation();
 
   if (isLoading) {
     return (
@@ -24,7 +25,8 @@ export function ProtectedAdminRoute({ children }: ProtectedAdminRouteProps) {
   }
 
   if (!user || !isAdmin) {
-    return <Navigate to="/admin/login" replace />;
+    // Store the intended location for redirect after login
+    return <Navigate to="/admin/login" state={{ from: location }} replace />;
   }
 
   return <>{children}</>;

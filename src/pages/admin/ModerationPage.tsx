@@ -6,6 +6,7 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Flag, MessageSquare, User, Clock, CheckCircle, XCircle, AlertTriangle } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
+import { FlagDetailsModal } from '@/components/admin/FlagDetailsModal';
 
 interface Flag {
   id: string;
@@ -129,6 +130,8 @@ const columns: Column<Flag>[] = [
 export default function ModerationPage() {
   const [flags, setFlags] = useState<Flag[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [selectedFlag, setSelectedFlag] = useState<Flag | null>(null);
+  const [isFlagDetailsModalOpen, setIsFlagDetailsModalOpen] = useState(false);
   const { toast } = useToast();
 
   useEffect(() => {
@@ -223,10 +226,8 @@ export default function ModerationPage() {
     {
       label: 'View Details',
       onClick: (flag: Flag) => {
-        toast({
-          title: "View Details",
-          description: `Viewing flag details`,
-        });
+        setSelectedFlag(flag);
+        setIsFlagDetailsModalOpen(true);
       },
     },
     {
@@ -305,6 +306,13 @@ export default function ModerationPage() {
         searchPlaceholder="Search flags..."
         filters={filters}
         actions={actions}
+      />
+
+      <FlagDetailsModal
+        isOpen={isFlagDetailsModalOpen}
+        onClose={() => setIsFlagDetailsModalOpen(false)}
+        flag={selectedFlag}
+        onSuccess={loadFlags}
       />
     </div>
   );
