@@ -466,10 +466,15 @@ src/
 ### Database Schema Overview
 ```sql
 -- Core Tables
-users (id, name, role, photo_url, referral_code, is_banned)
+users (id, name, photo_url, referral_code, is_banned)
 communities (id, name, description, city, image_url)
 events (id, title, description, date_time, venue, capacity, price, image_url)
 discussions (id, title, prompt, expires_at, is_visible, extended)
+
+-- Advanced Role & Permission System (NEW)
+user_roles (id, user_id, role, granted_by, granted_at, expires_at, is_active)
+user_permissions (id, user_id, permission_type, resource_type, resource_id, expires_at)
+bulk_operations (id, operation_type, initiated_by, target_count, status, operation_data)
 
 -- Relationship Tables
 community_members (user_id, community_id)
@@ -599,79 +604,89 @@ Weights: 100-1000 variable font weight
 
 ---
 
+### Phase 11: Advanced User Management ✅ COMPLETED
+**Timeframe:** Advanced Permission & Role System  
+**Status:** ✅ Complete  
+
+#### 11.1 Role System Refactor
+- [x] **Separate User Roles Table**
+  - Created `user_roles` table with proper relationships
+  - Enhanced role enum with granular roles (admin, moderator, community_manager, event_organizer, user)
+  - Role expiration system with automatic deactivation
+  - Role granting audit trail with granted_by tracking
+  - Performance optimized with proper indexing
+
+- [x] **Advanced Role Functions**
+  - `has_role()` function for secure role checking
+  - `get_user_highest_role()` for role hierarchy
+  - `is_admin()` helper function for admin checks
+  - Security definer functions to prevent RLS recursion
+  - Role timestamp management triggers
+
+#### 11.2 Bulk Operations System
+- [x] **Comprehensive Bulk Operations**
+  - Bulk role assignment interface
+  - Bulk user ban/unban capabilities
+  - Bulk notification system
+  - Bulk permission granting
+  - Bulk data export/import
+  - Operation status tracking and monitoring
+
+- [x] **Bulk Operations Management**
+  - `bulk_operations` table for operation tracking
+  - Real-time progress monitoring
+  - Success/error count tracking
+  - Operation cancellation capabilities
+  - Dry run mode for safe testing
+  - Batch processing with configurable sizes
+
+#### 11.3 Granular Permission System
+- [x] **Advanced Permissions**
+  - `user_permissions` table for granular control
+  - Resource-specific permissions (global, users, communities, events)
+  - Permission expiration system
+  - Permission type hierarchy (read, write, delete, admin, moderate)
+  - Resource-scoped permissions with specific resource IDs
+
+- [x] **Permission Management Interface**
+  - Permission granting with expiry dates
+  - Resource type selection (global or specific)
+  - Permission audit trail
+  - Bulk permission operations
+  - Active/inactive permission toggling
+
+#### 11.4 Enhanced Admin Interface
+- [x] **Advanced User Management Page**
+  - Tabbed interface for roles, operations, and permissions
+  - Real-time statistics dashboard
+  - Role management with user search
+  - Bulk operation monitoring
+  - Permission management interface
+
+- [x] **Modern Modal Components**
+  - `UserRoleModal` for role assignment/editing
+  - `BulkOperationModal` for bulk operation configuration
+  - `PermissionModal` for permission management
+  - Form validation and error handling
+  - Preview functionality for bulk operations
+
+#### 11.5 Security Enhancements
+- [x] **Updated RLS Policies**
+  - Migrated from old role system to new table-based roles
+  - Role-based access control for events and discussions
+  - Community manager and event organizer roles
+  - Moderator permissions for content management
+  - Admin override capabilities maintained
+
+---
+
 ## 🔮 Planned Future Phases
 
-### Phase 9: Advanced Analytics (PLANNED)
-**Priority:** High  
-**Estimated Timeline:** 2-3 weeks
+### Phase 9: Advanced Analytics (SKIPPED)
+**Status:** Skipped per user request
 
-#### 9.1 Advanced Reporting
-- [ ] **Custom Report Builder**
-  - Drag-and-drop report creation
-  - Custom date range selection
-  - Multiple data source correlation
-  - Automated report scheduling
-
-- [ ] **Export Capabilities**
-  - PDF report generation
-  - CSV data exports
-  - Excel workbook creation
-  - Email report delivery
-
-#### 9.2 Predictive Analytics
-- [ ] **Trend Forecasting**
-  - User growth predictions
-  - Event attendance forecasting
-  - Revenue projections
-  - Seasonal trend analysis
-
-- [ ] **Anomaly Detection**
-  - Unusual activity alerts
-  - Performance degradation warnings
-  - Security threat identification
-  - Data quality monitoring
-
-### Phase 10: Real-time Features (PLANNED)
-**Priority:** Medium  
-**Estimated Timeline:** 3-4 weeks
-
-#### 10.1 Live Updates
-- [ ] **Real-time Dashboard**
-  - Live metric updates
-  - Real-time user activity feed
-  - Instant notification system
-  - Live event registration tracking
-
-- [ ] **WebSocket Integration**
-  - Supabase realtime subscriptions
-  - Live data synchronization
-  - Collaborative editing support
-  - Real-time moderation alerts
-
-#### 10.2 Push Notifications
-- [ ] **Browser Notifications**
-  - Admin alert system
-  - Moderation queue notifications
-  - System status updates
-  - Custom notification preferences
-
-### Phase 11: Advanced User Management (PLANNED)
-**Priority:** Medium  
-**Estimated Timeline:** 2-3 weeks
-
-#### 11.1 Bulk Operations
-- [ ] **Bulk User Management**
-  - Mass user imports/exports
-  - Bulk role assignments
-  - Batch moderation actions
-  - Group communication tools
-
-#### 11.2 Advanced Permissions
-- [ ] **Granular Permission System**
-  - Feature-level permissions
-  - Resource-specific access control
-  - Temporary access grants
-  - Permission inheritance
+### Phase 10: Real-time Features (SKIPPED)  
+**Status:** Skipped per user request
 
 ### Phase 12: Integration & API (PLANNED)
 **Priority:** Low  
@@ -739,17 +754,19 @@ Weights: 100-1000 variable font weight
 ## 📈 Metrics & KPIs
 
 ### Development Metrics
-- **Total Components:** 45+ reusable components
-- **Pages Implemented:** 8 admin pages + 2 public pages
-- **Database Tables:** 15 core tables + 3 storage buckets
-- **Features Completed:** 90+ individual features
+- **Total Components:** 50+ reusable components (including 3 new advanced modals)
+- **Pages Implemented:** 9 admin pages + 2 public pages (added AdvancedUserManagementPage)
+- **Database Tables:** 18 core tables + 3 storage buckets (added role & permission tables)
+- **Features Completed:** 110+ individual features (added bulk operations & permissions)
 - **Code Quality:** TypeScript strict mode, ESLint configured
+- **Security Functions:** 8 custom database functions for role/permission management
 
 ### Performance Metrics
 - **Bundle Size:** Optimized with code splitting
 - **Loading Performance:** <2s initial load (target)
-- **Database Queries:** Optimized with proper indexing
+- **Database Queries:** Optimized with proper indexing + new role system indexes
 - **Image Loading:** Progressive with lazy loading
+- **Role Checking:** Optimized with security definer functions
 
 ---
 
@@ -761,9 +778,10 @@ Weights: 100-1000 variable font weight
 - **Styling:** Tailwind CSS + Custom design system
 - **UI Components:** Shadcn/ui + Radix primitives
 - **State Management:** React Query + Context API
-- **Backend:** Supabase (PostgreSQL + Auth + Storage)
+- **Backend:** Supabase (PostgreSQL + Auth + Storage + Advanced RLS)
 - **Charts:** Recharts library
 - **Forms:** React Hook Form + Zod validation
+- **Permissions:** Custom granular permission system
 
 ### Code Quality Tools
 - **TypeScript:** Strict mode for type safety
@@ -784,35 +802,35 @@ Weights: 100-1000 variable font weight
 
 ### Immediate Priorities (Next 1-2 weeks)
 1. **Testing Implementation**
-   - Unit tests for core components
-   - Integration tests for admin workflows
-   - End-to-end testing setup
+   - Unit tests for new role system components
+   - Integration tests for bulk operations
+   - End-to-end testing for permission management
 
 2. **Performance Optimization**
-   - Image optimization pipeline
-   - Query optimization review
-   - Bundle size analysis
+   - Role checking query optimization
+   - Bulk operation performance tuning
+   - Permission system indexing review
 
-3. **Documentation**
-   - API documentation
-   - Component documentation
-   - User guide creation
+3. **Security Hardening**
+   - Role escalation prevention
+   - Bulk operation audit logging
+   - Permission boundary testing
 
 ### Medium-term Goals (Next month)
-1. **Real-time Features**
-   - Live dashboard updates
-   - Push notification system
-   - WebSocket integration
+1. **Integration & API Development**
+   - Public API for role management
+   - Webhook system for role changes
+   - External integration points
 
-2. **Advanced Analytics**
-   - Custom report builder
-   - Export functionality
-   - Predictive analytics
+2. **Enhanced User Experience**
+   - Role-based UI customization
+   - Permission-aware component rendering
+   - Bulk operation progress notifications
 
-3. **Mobile Enhancement**
-   - Mobile-first redesign
-   - PWA implementation
-   - Touch optimization
+3. **Advanced Security Features**
+   - Two-factor authentication for admin roles
+   - Session management improvements
+   - Advanced audit logging
 
 ---
 
@@ -820,20 +838,23 @@ Weights: 100-1000 variable font weight
 
 ### Technical Achievements
 - ✅ **Modern Architecture:** Built with latest React patterns and TypeScript
-- ✅ **Scalable Design:** Modular component architecture
-- ✅ **Security First:** Comprehensive RLS policies and admin controls
-- ✅ **Performance Optimized:** Code splitting and lazy loading
+- ✅ **Scalable Design:** Modular component architecture with advanced permissions
+- ✅ **Security First:** Comprehensive RLS policies, role separation, and granular permissions
+- ✅ **Performance Optimized:** Code splitting, lazy loading, and optimized role checking
 - ✅ **Responsive Design:** Mobile-first approach with Tailwind CSS
-- ✅ **Type Safety:** Full TypeScript implementation
+- ✅ **Type Safety:** Full TypeScript implementation with complex data structures
 - ✅ **Accessibility:** Radix UI primitives for screen reader support
+- ✅ **Advanced Role System:** Separate table architecture with security definer functions
 
 ### Business Value Delivered
-- ✅ **Complete Admin Panel:** Full CRUD operations for all entities
+- ✅ **Complete Admin Panel:** Full CRUD operations for all entities with role-based access
+- ✅ **Advanced User Management:** Granular roles, bulk operations, and permission system
 - ✅ **Analytics Dashboard:** Comprehensive data visualization
 - ✅ **File Management:** Professional asset upload system
-- ✅ **User Management:** Role-based access control
+- ✅ **Enterprise-Grade Security:** Role-based access control with permission inheritance
 - ✅ **Revenue Tracking:** Payment and registration monitoring
-- ✅ **Moderation Tools:** Content flagging and user management
+- ✅ **Moderation Tools:** Content flagging and user management with role-based moderation
+- ✅ **Bulk Operations:** Efficient mass user management with audit trails
 
 ### Development Process Success
 - ✅ **Iterative Development:** Phased approach with regular deliverables
