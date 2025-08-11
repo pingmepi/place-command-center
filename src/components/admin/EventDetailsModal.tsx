@@ -9,11 +9,11 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
 import { Separator } from '@/components/ui/separator';
-import { 
-  Calendar, 
-  MapPin, 
-  Users, 
-  DollarSign, 
+import {
+  Calendar,
+  MapPin,
+  Users,
+  DollarSign,
   Edit,
   User,
   Building,
@@ -45,6 +45,22 @@ interface Event {
   registration_count?: number;
 }
 
+// Helpers for null-safe strings and initials (local to this file)
+const safeString = (v: unknown): string => {
+  if (v === null || v === undefined) return '';
+  try { return String(v); } catch { return ''; }
+};
+const getInitials = (name?: string): string => {
+  const s = safeString(name).trim();
+  if (!s) return 'U';
+  const parts = s.split(/\s+/).filter(Boolean);
+  const first = parts[0]?.[0];
+  const last = parts.length > 1 ? parts[parts.length - 1]?.[0] : undefined;
+  const initials = `${first ?? ''}${last ?? ''}`.toUpperCase();
+  return initials || (first?.toUpperCase() ?? 'U');
+};
+
+
 interface EventDetailsModalProps {
   isOpen: boolean;
   onClose: () => void;
@@ -75,14 +91,14 @@ export function EventDetailsModal({ isOpen, onClose, event, onSuccess }: EventDe
     if (event.is_cancelled) {
       return <Badge variant="destructive">Cancelled</Badge>;
     }
-    
+
     const eventDate = new Date(event.date_time);
     const now = new Date();
-    
+
     if (eventDate < now) {
       return <Badge variant="secondary">Completed</Badge>;
     }
-    
+
     return <Badge variant="default">Upcoming</Badge>;
   };
 
@@ -156,10 +172,10 @@ export function EventDetailsModal({ isOpen, onClose, event, onSuccess }: EventDe
                 <div className="text-sm">
                   <p>{event.registration_count || 0} / {event.capacity} registered</p>
                   <div className="w-full bg-muted rounded-full h-2 mt-1">
-                    <div 
+                    <div
                       className="bg-primary rounded-full h-2 transition-all"
-                      style={{ 
-                        width: `${Math.min(((event.registration_count || 0) / event.capacity) * 100, 100)}%` 
+                      style={{
+                        width: `${Math.min(((event.registration_count || 0) / event.capacity) * 100, 100)}%`
                       }}
                     />
                   </div>
@@ -188,9 +204,13 @@ export function EventDetailsModal({ isOpen, onClose, event, onSuccess }: EventDe
                 </div>
                 <div className="flex items-center gap-3">
                   <Avatar className="h-8 w-8">
-                    <AvatarImage src={event.community.photo_url} />
+                    <AvatarImage
+                      src={safeString(event.community.photo_url) || undefined}
+                      alt={safeString(event.community.name) || 'Community image'}
+                      onError={(e) => { e.currentTarget.onerror = null; e.currentTarget.src = ''; }}
+                    />
                     <AvatarFallback>
-                      {event.community.name.substring(0, 2).toUpperCase()}
+                      {getInitials(event.community.name)}
                     </AvatarFallback>
                   </Avatar>
                   <div>
@@ -208,9 +228,13 @@ export function EventDetailsModal({ isOpen, onClose, event, onSuccess }: EventDe
                 </div>
                 <div className="flex items-center gap-3">
                   <Avatar className="h-8 w-8">
-                    <AvatarImage src={event.host.photo_url} />
+                    <AvatarImage
+                      src={safeString(event.host.photo_url) || undefined}
+                      alt={safeString(event.host.name) || 'Host avatar'}
+                      onError={(e) => { e.currentTarget.onerror = null; e.currentTarget.src = ''; }}
+                    />
                     <AvatarFallback>
-                      {event.host.name.split(' ').map(n => n[0]).join('').toUpperCase()}
+                      {getInitials(event.host.name)}
                     </AvatarFallback>
                   </Avatar>
                   <p className="text-sm font-medium">{event.host.name}</p>

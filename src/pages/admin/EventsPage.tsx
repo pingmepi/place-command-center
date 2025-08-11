@@ -37,6 +37,22 @@ interface Event {
   tags?: { name: string }[];
 }
 
+// Helpers for null-safe strings and initials
+const safeString = (v: unknown): string => {
+  if (v === null || v === undefined) return '';
+  try { return String(v); } catch { return ''; }
+};
+const getInitials = (name?: string): string => {
+  const s = safeString(name).trim();
+  if (!s) return 'U';
+  const parts = s.split(/\s+/).filter(Boolean);
+  const first = parts[0]?.[0];
+  const last = parts.length > 1 ? parts[parts.length - 1]?.[0] : undefined;
+  const initials = `${first ?? ''}${last ?? ''}`.toUpperCase();
+  return initials || (first?.toUpperCase() ?? 'U');
+};
+
+
 const columns: Column<Event>[] = [
   {
     key: 'title',
@@ -45,7 +61,11 @@ const columns: Column<Event>[] = [
     render: (value, row) => (
       <div className="flex items-center gap-3">
         <Avatar className="h-10 w-10">
-          <AvatarImage src={row.image_url} />
+          <AvatarImage
+            src={safeString(row.image_url) || undefined}
+            alt={safeString(row.title) || 'Event image'}
+            onError={(e) => { e.currentTarget.onerror = null; e.currentTarget.src = ''; }}
+          />
           <AvatarFallback>
             <Calendar className="h-5 w-5" />
           </AvatarFallback>
@@ -100,9 +120,13 @@ const columns: Column<Event>[] = [
         {row.host ? (
           <>
             <Avatar className="h-6 w-6">
-              <AvatarImage src={row.host.photo_url} />
+              <AvatarImage
+                src={safeString(row.host.photo_url) || undefined}
+                alt={safeString(row.host.name) || 'Host avatar'}
+                onError={(e) => { e.currentTarget.onerror = null; e.currentTarget.src = ''; }}
+              />
               <AvatarFallback className="text-xs">
-                {row.host.name.split(' ').map(n => n[0]).join('').toUpperCase()}
+                {getInitials(row.host.name)}
               </AvatarFallback>
             </Avatar>
             <span className="text-sm">{row.host.name}</span>
@@ -132,8 +156,8 @@ const columns: Column<Event>[] = [
       <div className="flex items-center gap-2">
         <DollarSign className="h-4 w-4 text-muted-foreground" />
         <span>
-          {value && value > 0 
-            ? `${row.currency || 'INR'} ${value}` 
+          {value && value > 0
+            ? `${row.currency || 'INR'} ${value}`
             : 'Free'
           }
         </span>
@@ -179,7 +203,7 @@ export default function EventsPage() {
   const loadEvents = async () => {
     try {
       setIsLoading(true);
-      
+
       const { data: eventsData, error } = await supabase
         .from('events')
         .select(`

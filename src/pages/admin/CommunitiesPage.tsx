@@ -20,6 +20,22 @@ interface Community {
   event_count?: number;
 }
 
+// Helpers for null-safe strings and initials
+const safeString = (v: unknown): string => {
+  if (v === null || v === undefined) return '';
+  try { return String(v); } catch { return ''; }
+};
+const getInitials = (name?: string): string => {
+  const s = safeString(name).trim();
+  if (!s) return 'U';
+  const parts = s.split(/\s+/).filter(Boolean);
+  const first = parts[0]?.[0];
+  const last = parts.length > 1 ? parts[parts.length - 1]?.[0] : undefined;
+  const initials = `${first ?? ''}${last ?? ''}`.toUpperCase();
+  return initials || (first?.toUpperCase() ?? 'U');
+};
+
+
 const columns: Column<Community>[] = [
   {
     key: 'name',
@@ -28,9 +44,13 @@ const columns: Column<Community>[] = [
     render: (value, row) => (
       <div className="flex items-center gap-3">
         <Avatar className="h-10 w-10">
-          <AvatarImage src={row.image_url} />
+          <AvatarImage
+            src={safeString(row.image_url) || undefined}
+            alt={safeString(row.name) || 'Community image'}
+            onError={(e) => { e.currentTarget.onerror = null; e.currentTarget.src = ''; }}
+          />
           <AvatarFallback>
-            {row.name.split(' ').map(n => n[0]).join('').toUpperCase()}
+            {getInitials(row.name)}
           </AvatarFallback>
         </Avatar>
         <div>
@@ -98,7 +118,7 @@ export default function CommunitiesPage() {
   const loadCommunities = async () => {
     try {
       setIsLoading(true);
-      
+
       // Fetch communities with member and event counts
       const { data: communitiesData, error } = await supabase
         .from('communities')

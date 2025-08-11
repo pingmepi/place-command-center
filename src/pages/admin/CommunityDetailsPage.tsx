@@ -5,12 +5,12 @@ import { Badge } from '@/components/ui/badge';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Separator } from '@/components/ui/separator';
-import { 
-  ArrowLeft, 
-  Users, 
-  Calendar, 
-  MessageSquare, 
-  MapPin, 
+import {
+  ArrowLeft,
+  Users,
+  Calendar,
+  MessageSquare,
+  MapPin,
   User,
   Edit,
   Trash2,
@@ -60,6 +60,22 @@ interface Community {
   }>;
 }
 
+// Helpers for null-safe strings and initials
+const safeString = (v: unknown): string => {
+  if (v === null || v === undefined) return '';
+  try { return String(v); } catch { return ''; }
+};
+const getInitials = (name?: string): string => {
+  const s = safeString(name).trim();
+  if (!s) return 'U';
+  const parts = s.split(/\s+/).filter(Boolean);
+  const first = parts[0]?.[0];
+  const last = parts.length > 1 ? parts[parts.length - 1]?.[0] : undefined;
+  const initials = `${first ?? ''}${last ?? ''}`.toUpperCase();
+  return initials || (first?.toUpperCase() ?? 'U');
+};
+
+
 export default function CommunityDetailsPage() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
@@ -76,7 +92,7 @@ export default function CommunityDetailsPage() {
   const loadCommunity = async (communityId: string) => {
     try {
       setIsLoading(true);
-      
+
       // Load community basic info
       const { data, error } = await supabase
         .from('communities')
@@ -236,9 +252,13 @@ export default function CommunityDetailsPage() {
         <CardHeader>
           <div className="flex items-start gap-4">
             <Avatar className="h-20 w-20">
-              <AvatarImage src={community.image_url} />
+              <AvatarImage
+                src={safeString(community.image_url) || undefined}
+                alt={safeString(community.name) || 'Community image'}
+                onError={(e) => { e.currentTarget.onerror = null; e.currentTarget.src = ''; }}
+              />
               <AvatarFallback className="text-xl">
-                {community.name.split(' ').map(n => n[0]).join('').toUpperCase()}
+                {getInitials(community.name)}
               </AvatarFallback>
             </Avatar>
             <div className="space-y-2 flex-1">
@@ -273,7 +293,7 @@ export default function CommunityDetailsPage() {
                 <p className="text-sm text-muted-foreground">Members</p>
               </CardContent>
             </Card>
-            
+
             <Card>
               <CardContent className="p-4 text-center">
                 <div className="flex items-center justify-center gap-2 mb-2">
@@ -393,9 +413,13 @@ export default function CommunityDetailsPage() {
         <CardContent>
           <div className="flex items-center gap-4">
             <Avatar className="h-12 w-12">
-              <AvatarImage src={community.creator.photo_url} />
+              <AvatarImage
+                src={safeString(community.creator.photo_url) || undefined}
+                alt={safeString(community.creator.name) || 'Creator avatar'}
+                onError={(e) => { e.currentTarget.onerror = null; e.currentTarget.src = ''; }}
+              />
               <AvatarFallback>
-                {community.creator.name.split(' ').map(n => n[0]).join('').toUpperCase()}
+                {getInitials(community.creator.name)}
               </AvatarFallback>
             </Avatar>
             <div>

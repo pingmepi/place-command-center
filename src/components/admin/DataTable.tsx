@@ -36,6 +36,13 @@ import {
 } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 
+// Null-safe string helper
+const safeString = (v: unknown): string => {
+  if (v === null || v === undefined) return '';
+  try { return String(v); } catch { return ''; }
+};
+
+
 export interface Column<T> {
   key: keyof T;
   header: string;
@@ -85,16 +92,16 @@ export function DataTable<T extends Record<string, any>>({
   // Filter data
   const filteredData = data.filter((row) => {
     // Search filter
-    const matchesSearch = searchTerm === '' || 
+    const matchesSearch = searchTerm === '' ||
       columns.some(column => {
         const value = row[column.key];
-        return value?.toString().toLowerCase().includes(searchTerm.toLowerCase());
+        return safeString(value).toLowerCase().includes(searchTerm.toLowerCase());
       });
 
     // Column filters
     const matchesFilters = Object.entries(filterValues).every(([key, value]) => {
       if (!value) return true;
-      return row[key]?.toString().toLowerCase() === value.toLowerCase();
+      return safeString(row[key]).toLowerCase() === value.toLowerCase();
     });
 
     return matchesSearch && matchesFilters;
@@ -103,10 +110,10 @@ export function DataTable<T extends Record<string, any>>({
   // Sort data
   const sortedData = [...filteredData].sort((a, b) => {
     if (!sortColumn) return 0;
-    
+
     const aValue = a[sortColumn];
     const bValue = b[sortColumn];
-    
+
     if (aValue < bValue) return sortDirection === 'asc' ? -1 : 1;
     if (aValue > bValue) return sortDirection === 'asc' ? 1 : -1;
     return 0;
@@ -180,7 +187,7 @@ export function DataTable<T extends Record<string, any>>({
               className="pl-10 admin-focus"
             />
           </div>
-          
+
           {filters.map((filter) => (
             <Select
               key={filter.key.toString()}
@@ -218,8 +225,8 @@ export function DataTable<T extends Record<string, any>>({
                     <div className="flex items-center gap-2">
                       {column.header}
                       {column.sortable && sortColumn === column.key && (
-                        sortDirection === 'asc' ? 
-                          <ChevronUp className="h-4 w-4" /> : 
+                        sortDirection === 'asc' ?
+                          <ChevronUp className="h-4 w-4" /> :
                           <ChevronDown className="h-4 w-4" />
                       )}
                     </div>
@@ -248,8 +255,8 @@ export function DataTable<T extends Record<string, any>>({
                 ))
               ) : paginatedData.length === 0 ? (
                 <TableRow>
-                  <TableCell 
-                    colSpan={columns.length + (actions.length > 0 ? 1 : 0)} 
+                  <TableCell
+                    colSpan={columns.length + (actions.length > 0 ? 1 : 0)}
                     className="text-center py-8 text-muted-foreground"
                   >
                     No data found
@@ -260,7 +267,7 @@ export function DataTable<T extends Record<string, any>>({
                   <TableRow key={index} className="hover:bg-muted/50">
                     {columns.map((column) => (
                       <TableCell key={column.key.toString()}>
-                        {column.render 
+                        {column.render
                           ? column.render(row[column.key], row)
                           : row[column.key]?.toString() || '-'
                         }

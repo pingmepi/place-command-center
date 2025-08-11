@@ -23,42 +23,64 @@ interface User {
   badge_count?: number;
 }
 
+
+// Null-safe helpers for string handling and initials
+function safeString(v: unknown): string {
+  if (v === null || v === undefined) return '';
+  try {
+    return String(v);
+  } catch {
+    return '';
+  }
+}
+
+function getInitials(name?: string): string {
+  const s = safeString(name).trim();
+  if (!s) return 'U';
+  const parts = s.split(/\s+/).filter(Boolean);
+  const first = parts[0]?.[0];
+  const last = parts.length > 1 ? parts[parts.length - 1]?.[0] : undefined;
+  const initials = `${first ?? ''}${last ?? ''}`.toUpperCase();
+  return initials || (first?.toUpperCase() ?? 'U');
+}
+
 const columns: Column<User>[] = [
   {
     key: 'photo_url',
     header: 'Avatar',
-    render: (user: User) => (
-      user.photo_url ? (
-        <img 
-          src={user.photo_url} 
-          alt={user.name}
-          className="w-10 h-10 rounded-full object-cover"
+    render: (value, user) => (
+      <Avatar className="h-10 w-10">
+        <AvatarImage
+          src={safeString(value) || undefined}
+          alt={safeString((user as User)?.name) || 'User avatar'}
+          onError={(e) => { e.currentTarget.onerror = null; e.currentTarget.src = ''; }}
         />
-      ) : (
-        <div className="w-10 h-10 rounded-full bg-muted flex items-center justify-center">
-          <span className="text-xs text-muted-foreground">
-            {user.name.charAt(0).toUpperCase()}
-          </span>
-        </div>
-      )
+        <AvatarFallback className="text-xs">
+          {getInitials((user as User)?.name)}
+        </AvatarFallback>
+      </Avatar>
     ),
   },
   {
     key: 'name',
     header: 'User',
     sortable: true,
-    render: (value, row) => (
+    render: (_value, row) => (
       <div className="flex items-center gap-3">
         <Avatar className="h-10 w-10">
-          <AvatarImage src={row.photo_url} />
+          <AvatarImage
+            src={safeString(row.photo_url) || undefined}
+            alt={safeString(row.name) || 'User avatar'}
+            onError={(e) => { e.currentTarget.onerror = null; e.currentTarget.src = ''; }}
+          />
           <AvatarFallback>
-            {row.name.split(' ').map(n => n[0]).join('').toUpperCase()}
+            {getInitials(row.name)}
           </AvatarFallback>
         </Avatar>
         <div>
-          <p className="font-medium">{row.name}</p>
+          <p className="font-medium">{safeString(row.name) || 'Unknown'}</p>
           <p className="text-sm text-muted-foreground">
-            ID: {row.id.slice(0, 8)}...
+            ID: {safeString(row.id).slice(0, 8)}...
           </p>
         </div>
       </div>
@@ -181,7 +203,7 @@ export default function UsersPage() {
     try {
       setIsLoading(true);
       console.log('Loading users...');
-      
+
       // First get basic user data
       const { data: usersData, error: usersError } = await supabase
         .from('users')
