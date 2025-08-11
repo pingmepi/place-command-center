@@ -19,6 +19,7 @@ import {
   Building,
   Clock
 } from 'lucide-react';
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent as AlertContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader as AlertHeader, AlertDialogTitle as AlertTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
 import { EventModal } from './EventModal';
 
 interface Event {
@@ -66,9 +67,11 @@ interface EventDetailsModalProps {
   onClose: () => void;
   event: Event | null;
   onSuccess?: () => void;
+  onViewRegistrations?: () => void;
+  onCancel?: () => void;
 }
 
-export function EventDetailsModal({ isOpen, onClose, event, onSuccess }: EventDetailsModalProps) {
+export function EventDetailsModal({ isOpen, onClose, event, onSuccess, onViewRegistrations, onCancel }: EventDetailsModalProps) {
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
 
   if (!event) return null;
@@ -259,6 +262,34 @@ export function EventDetailsModal({ isOpen, onClose, event, onSuccess }: EventDe
                   minute: '2-digit'
                 })}
               </p>
+            </div>
+
+            {/* Actions (replaces table dropdown) */}
+            <div className="flex items-center justify-end gap-2 pt-2">
+              {onViewRegistrations && (
+                <Button variant="outline" onClick={onViewRegistrations} className="gap-2">
+                  View Registrations
+                </Button>
+              )}
+              {onCancel && (
+                <AlertDialog>
+                  <AlertDialogTrigger asChild>
+                    <Button variant="destructive" className="gap-2">Cancel Event</Button>
+                  </AlertDialogTrigger>
+                  <AlertContent>
+                    <AlertHeader>
+                      <AlertTitle>Cancel this event?</AlertTitle>
+                      <AlertDialogDescription>
+                        This action will mark the event as cancelled. Attendees will no longer be able to register.
+                      </AlertDialogDescription>
+                    </AlertHeader>
+                    <AlertDialogFooter>
+                      <AlertDialogCancel>Nevermind</AlertDialogCancel>
+                      <AlertDialogAction onClick={onCancel}>Yes, cancel</AlertDialogAction>
+                    </AlertDialogFooter>
+                  </AlertContent>
+                </AlertDialog>
+              )}
             </div>
           </div>
         </DialogContent>

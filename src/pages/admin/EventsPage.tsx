@@ -236,10 +236,7 @@ export default function EventsPage() {
     }
   };
 
-  const handleEdit = (event: Event) => {
-    setSelectedEvent(event);
-    setIsModalOpen(true);
-  };
+
 
   const handleCreate = () => {
     setSelectedEvent(undefined);
@@ -250,12 +247,23 @@ export default function EventsPage() {
     loadEvents();
   };
 
-  const handleCancel = (event: Event) => {
-    toast({
-      title: "Cancel Event",
-      description: `Cancel ${event.title} - Feature coming soon!`,
-      variant: "destructive",
-    });
+  const handleCancel = async (event: Event) => {
+    // Optimistic UI: close details modal
+    setIsEventDetailsModalOpen(false);
+    const prev = events;
+    // Immediately reflect cancelled status in local list
+    setEvents((cur) => cur.map(e => e.id === event.id ? { ...e, is_cancelled: true } : e));
+    try {
+      const { error } = await supabase.from('events').update({ is_cancelled: true }).eq('id', event.id);
+      if (error) throw error;
+      toast({ title: 'Event Cancelled', description: `${event.title} has been cancelled.` });
+      // Refresh from server
+      await loadEvents();
+    } catch (err) {
+      console.error('Cancel event failed', err);
+      setEvents(prev); // revert
+      toast({ title: 'Failed to cancel', description: 'Please try again.', variant: 'destructive' });
+    }
   };
 
   const handleExport = () => {
@@ -290,31 +298,7 @@ export default function EventsPage() {
     },
   ];
 
-  const actions = [
-    {
-      label: 'View Event Details',
-      onClick: (event: Event) => {
-        setSelectedEvent(event);
-        setIsEventDetailsModalOpen(true);
-      },
-    },
-    {
-      label: 'View Registrations',
-      onClick: (event: Event) => {
-        setSelectedEvent(event);
-        setIsRegistrationsModalOpen(true);
-      },
-    },
-    {
-      label: 'Edit Event',
-      onClick: handleEdit,
-    },
-    {
-      label: 'Cancel Event',
-      onClick: handleCancel,
-      variant: 'destructive' as const,
-    },
-  ];
+
 
   return (
     <div className="space-y-6">
@@ -340,7 +324,7 @@ export default function EventsPage() {
         onExport={handleExport}
         searchPlaceholder="Search events..."
         filters={filters}
-        actions={actions}
+        onRowClick={(event) => { setSelectedEvent(event as unknown as Event); setIsEventDetailsModalOpen(true); }}
       />
 
       <EventModal
@@ -362,6 +346,8 @@ export default function EventsPage() {
         onClose={() => setIsEventDetailsModalOpen(false)}
         event={selectedEvent || null}
         onSuccess={loadEvents}
+        onViewRegistrations={() => setIsRegistrationsModalOpen(true)}
+        onCancel={() => selectedEvent && handleCancel(selectedEvent)}
       />
     </div>
   );

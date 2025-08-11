@@ -69,6 +69,7 @@ export interface DataTableProps<T> {
     onClick: (row: T) => void;
     variant?: 'default' | 'destructive';
   }[];
+  onRowClick?: (row: T) => void;
 }
 
 export function DataTable<T extends Record<string, any>>({
@@ -81,6 +82,7 @@ export function DataTable<T extends Record<string, any>>({
   searchPlaceholder = "Search...",
   filters = [],
   actions = [],
+  onRowClick,
 }: DataTableProps<T>) {
   const [searchTerm, setSearchTerm] = useState('');
   const [sortColumn, setSortColumn] = useState<keyof T | null>(null);
@@ -264,7 +266,20 @@ export function DataTable<T extends Record<string, any>>({
                 </TableRow>
               ) : (
                 paginatedData.map((row, index) => (
-                  <TableRow key={index} className="hover:bg-muted/50">
+                  <TableRow
+                    key={index}
+                    className={`hover:bg-muted/50 ${onRowClick ? 'cursor-pointer' : ''}`}
+                    onClick={() => onRowClick?.(row)}
+                    tabIndex={onRowClick ? 0 : -1}
+                    onKeyDown={(e) => {
+                      if (!onRowClick) return;
+                      if (e.key === 'Enter' || e.key === ' ') {
+                        e.preventDefault();
+                        onRowClick(row);
+                      }
+                    }}
+                    aria-label={onRowClick ? 'View details' : undefined}
+                  >
                     {columns.map((column) => (
                       <TableCell key={column.key.toString()}>
                         {column.render
@@ -274,7 +289,7 @@ export function DataTable<T extends Record<string, any>>({
                       </TableCell>
                     ))}
                     {actions.length > 0 && (
-                      <TableCell>
+                      <TableCell onClick={(e) => e.stopPropagation()}>
                         <DropdownMenu>
                           <DropdownMenuTrigger asChild>
                             <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
