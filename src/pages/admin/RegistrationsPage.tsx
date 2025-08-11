@@ -260,30 +260,7 @@ export default function RegistrationsPage() {
     setIsDetailsModalOpen(true);
   };
 
-  const actions = [
-    {
-      label: 'View Details',
-      onClick: handleViewDetails,
-    },
-    {
-      label: 'Contact User',
-      onClick: (registration: Registration) => {
-        toast({
-          title: "Contact User",
-          description: `Contact ${registration.user.name} - Feature coming soon!`,
-        });
-      },
-    },
-    {
-      label: 'Process Refund',
-      onClick: handleRefund,
-    },
-    {
-      label: 'Cancel Registration',
-      onClick: handleCancelRegistration,
-      variant: 'destructive' as const,
-    },
-  ];
+
 
   return (
     <div className="space-y-6">
@@ -309,13 +286,16 @@ export default function RegistrationsPage() {
         onExport={handleExport}
         searchPlaceholder="Search registrations..."
         filters={filters}
-        actions={actions}
+        onRowClick={(r) => handleViewDetails(r as Registration)}
       />
 
       <RegistrationDetailsModal
         isOpen={isDetailsModalOpen}
         onClose={() => setIsDetailsModalOpen(false)}
         registration={selectedRegistration}
+        onContactUser={() => selectedRegistration && toast({ title: 'Contact User', description: `Contact ${selectedRegistration.user.name} - Feature coming soon!` })}
+        onRefund={() => selectedRegistration && handleRefund(selectedRegistration)}
+        onCancel={() => selectedRegistration && handleCancelRegistration(selectedRegistration)}
       />
     </div>
   );

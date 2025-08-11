@@ -7,6 +7,7 @@ import { Plus, Shield, UserCheck, UserX, Clock, Award } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { UserModal } from '@/components/admin/UserModal';
+import { UserDetailsModal } from '@/components/admin/UserDetailsModal';
 
 interface User {
   id: string;
@@ -193,6 +194,8 @@ export default function UsersPage() {
   const [isLoading, setIsLoading] = useState(true);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedUser, setSelectedUser] = useState<User | undefined>();
+  const [isDetailsOpen, setIsDetailsOpen] = useState(false);
+  const [detailsUser, setDetailsUser] = useState<User | null>(null);
   const { toast } = useToast();
 
   useEffect(() => {
@@ -327,30 +330,7 @@ export default function UsersPage() {
     loadUsers();
   };
 
-  const actions = [
-    {
-      label: 'View Profile',
-      onClick: (user: User) => {
-        toast({
-          title: "View Profile",
-          description: `Viewing profile for ${user.name}`,
-        });
-      },
-    },
-    {
-      label: 'Edit User',
-      onClick: handleEditUser,
-    },
-    {
-      label: 'Promote to Admin',
-      onClick: handlePromoteUser,
-    },
-    {
-      label: 'Ban User',
-      onClick: handleBanUser,
-      variant: 'destructive' as const,
-    },
-  ];
+
 
   return (
     <div className="space-y-6">
@@ -376,7 +356,7 @@ export default function UsersPage() {
         onExport={handleExport}
         searchPlaceholder="Search users..."
         filters={filters}
-        actions={actions}
+        onRowClick={(user) => { setDetailsUser(user as User); setIsDetailsOpen(true); }}
       />
 
       <UserModal
@@ -384,6 +364,15 @@ export default function UsersPage() {
         onClose={() => setIsModalOpen(false)}
         onSuccess={handleModalSuccess}
         user={selectedUser}
+      />
+
+      <UserDetailsModal
+        isOpen={isDetailsOpen}
+        onClose={() => setIsDetailsOpen(false)}
+        user={detailsUser}
+        onEdit={(u) => { setSelectedUser(u); setIsModalOpen(true); }}
+        onPromote={(u) => handlePromoteUser(u)}
+        onBan={(u) => handleBanUser(u)}
       />
     </div>
   );

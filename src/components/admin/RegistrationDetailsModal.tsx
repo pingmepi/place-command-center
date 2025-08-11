@@ -9,11 +9,12 @@ import {
 import { Badge } from '@/components/ui/badge';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Separator } from '@/components/ui/separator';
-import { 
-  Calendar, 
-  MapPin, 
-  User, 
-  CreditCard, 
+import { Button } from '@/components/ui/button';
+import {
+  Calendar,
+  MapPin,
+  User,
+  CreditCard,
   Clock,
   Mail,
   Phone,
@@ -49,17 +50,26 @@ interface Registration {
   };
 }
 
+
 interface RegistrationDetailsModalProps {
   isOpen: boolean;
   onClose: () => void;
   registration: Registration | null;
+  onContactUser?: () => void;
+  onRefund?: () => void;
+  onCancel?: () => void;
 }
+
 
 export function RegistrationDetailsModal({
   isOpen,
   onClose,
   registration,
+  onContactUser,
+  onRefund,
+  onCancel,
 }: RegistrationDetailsModalProps) {
+
   if (!registration) return null;
 
   const getStatusIcon = (status: string) => {
@@ -195,7 +205,7 @@ export function RegistrationDetailsModal({
                 </Badge>
               </div>
             </div>
-            
+
             {registration.payment_id && (
               <div className="space-y-2">
                 <label className="text-sm font-medium text-muted-foreground">Payment ID</label>
@@ -220,7 +230,7 @@ export function RegistrationDetailsModal({
               <Separator />
               <div className="space-y-4">
                 <h3 className="text-lg font-semibold">Additional Information</h3>
-                
+
                 {registration.special_requests && (
                   <div className="space-y-2">
                     <label className="text-sm font-medium text-muted-foreground">Special Requests</label>
@@ -258,6 +268,26 @@ export function RegistrationDetailsModal({
             </>
           )}
         </div>
+
+          {/* Actions (replaces table dropdown) */}
+          <div className="flex items-center justify-end gap-2 pt-2">
+            {onContactUser && (
+              <Button variant="outline" onClick={onContactUser} className="gap-2">
+                Contact User
+              </Button>
+            )}
+            {onRefund && (
+              <Button variant="outline" onClick={onRefund} className="gap-2">
+                Process Refund
+              </Button>
+            )}
+            {onCancel && (
+              <Button variant="destructive" onClick={onCancel} className="gap-2">
+                Cancel Registration
+              </Button>
+            )}
+            <Button variant="outline" onClick={onClose}>Close</Button>
+          </div>
       </DialogContent>
     </Dialog>
   );

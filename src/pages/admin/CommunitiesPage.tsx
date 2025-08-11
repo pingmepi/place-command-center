@@ -7,6 +7,7 @@ import { Plus, MapPin, Users, Calendar } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { CommunityModal } from '@/components/admin/CommunityModal';
+import { CommunityDetailsModal } from '@/components/admin/CommunityDetailsModal';
 
 interface Community {
   id: string;
@@ -109,6 +110,8 @@ export default function CommunitiesPage() {
   const [isLoading, setIsLoading] = useState(true);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedCommunity, setSelectedCommunity] = useState<Community | undefined>();
+  const [isDetailsOpen, setIsDetailsOpen] = useState(false);
+  const [detailsCommunity, setDetailsCommunity] = useState<Community | null>(null);
   const { toast } = useToast();
 
   useEffect(() => {
@@ -160,12 +163,9 @@ export default function CommunitiesPage() {
     setIsModalOpen(true);
   };
 
-  const handleDelete = (community: Community) => {
-    toast({
-      title: "Delete Community",
-      description: `Delete ${community.name} - Feature coming soon!`,
-      variant: "destructive",
-    });
+  const openDetails = (community: Community) => {
+    setDetailsCommunity(community);
+    setIsDetailsOpen(true);
   };
 
   const handleModalSuccess = () => {
@@ -193,26 +193,7 @@ export default function CommunitiesPage() {
     },
   ];
 
-  const actions = [
-    {
-      label: 'Edit Community',
-      onClick: handleEdit,
-    },
-    {
-      label: 'View Details',
-      onClick: (community: Community) => {
-        toast({
-          title: "View Details",
-          description: `Viewing details for ${community.name}`,
-        });
-      },
-    },
-    {
-      label: 'Delete Community',
-      onClick: handleDelete,
-      variant: 'destructive' as const,
-    },
-  ];
+  const actions: never[] = [];
 
   return (
     <div className="space-y-6">
@@ -239,6 +220,7 @@ export default function CommunitiesPage() {
         searchPlaceholder="Search communities..."
         filters={filters}
         actions={actions}
+        onRowClick={openDetails}
       />
 
       <CommunityModal
@@ -246,6 +228,13 @@ export default function CommunitiesPage() {
         onClose={() => setIsModalOpen(false)}
         onSuccess={handleModalSuccess}
         community={selectedCommunity}
+      />
+
+      <CommunityDetailsModal
+        isOpen={isDetailsOpen}
+        onClose={() => setIsDetailsOpen(false)}
+        community={detailsCommunity}
+        onSuccess={loadCommunities}
       />
     </div>
   );

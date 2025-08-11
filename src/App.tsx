@@ -6,6 +6,7 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { ThemeProvider } from "next-themes";
 import Index from "./pages/Index";
 import NotFound from "./pages/NotFound";
+import { ErrorBoundary } from "@/components/common/ErrorBoundary";
 
 // Admin imports
 import { AdminAuthProvider } from "@/components/admin/AdminAuthProvider";
@@ -35,34 +36,36 @@ const App = () => (
           <Toaster />
           <Sonner />
           <BrowserRouter>
-            <Routes>
-              {/* Public Routes */}
-              <Route path="/" element={<Index />} />
-              
-              {/* Admin Routes */}
-              <Route path="/admin/login" element={<AdminLoginPage />} />
-              <Route path="/admin" element={
-                <ProtectedAdminRoute>
-                  <AdminLayout />
-                </ProtectedAdminRoute>
-              }>
-                <Route index element={<AdminDashboard />} />
-                <Route path="communities" element={<CommunitiesPage />} />
-                <Route path="communities/:id" element={<CommunityDetailsPage />} />
-                <Route path="events" element={<EventsPage />} />
-                <Route path="users" element={<UsersPage />} />
-                <Route path="discussions" element={<DiscussionsPage />} />
-                <Route path="discussions/:id" element={<DiscussionDetailsPage />} />
-                <Route path="registrations" element={<RegistrationsPage />} />
-                <Route path="moderation" element={<ModerationPage />} />
-                <Route path="analytics" element={<AnalyticsPage />} />
-                <Route path="advanced-users" element={<AdvancedUserManagementPage />} />
-                <Route path="settings" element={<SystemSettingsPage />} />
-              </Route>
-              
-              {/* Catch-all route */}
-              <Route path="*" element={<NotFound />} />
-            </Routes>
+            <ErrorBoundary>
+              <Routes>
+                {/* Public Routes */}
+                <Route path="/" element={<Index />} />
+
+                {/* Admin Routes */}
+                <Route path="/admin/login" element={<AdminLoginPage />} />
+                <Route path="/admin" element={
+                  <ProtectedAdminRoute>
+                    <AdminLayout />
+                  </ProtectedAdminRoute>
+                }>
+                  <Route index element={<AdminDashboard />} />
+                  <Route path="communities" element={<CommunitiesPage />} />
+                  <Route path="communities/:id" element={<CommunityDetailsPage />} />
+                  <Route path="events" element={<EventsPage />} />
+                  <Route path="users" element={<UsersPage />} />
+                  <Route path="discussions" element={<DiscussionsPage />} />
+                  <Route path="discussions/:id" element={<DiscussionDetailsPage />} />
+                  <Route path="registrations" element={<RegistrationsPage />} />
+                  <Route path="moderation" element={<ModerationPage />} />
+                  <Route path="analytics" element={<AnalyticsPage />} />
+                  <Route path="advanced-users" element={<AdvancedUserManagementPage />} />
+                  <Route path="settings" element={<SystemSettingsPage />} />
+                </Route>
+
+                {/* Catch-all route */}
+                <Route path="*" element={<NotFound />} />
+              </Routes>
+            </ErrorBoundary>
           </BrowserRouter>
         </TooltipProvider>
       </AdminAuthProvider>

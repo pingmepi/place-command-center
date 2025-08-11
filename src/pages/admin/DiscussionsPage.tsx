@@ -7,6 +7,7 @@ import { Plus, MessageSquare, Eye, EyeOff, Clock, MapPin, User } from 'lucide-re
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { DiscussionModal } from '@/components/admin/DiscussionModal';
+import { DiscussionDetailsModal } from '@/components/admin/DiscussionDetailsModal';
 
 interface Discussion {
   id: string;
@@ -119,7 +120,7 @@ const columns: Column<Discussion>[] = [
       const now = new Date();
       const isExpired = expiresAt < now;
       const isExtended = row.extended;
-      
+
       return (
         <div className="flex items-center gap-2">
           <Clock className="h-4 w-4 text-muted-foreground" />
@@ -150,6 +151,9 @@ export default function DiscussionsPage() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedDiscussion, setSelectedDiscussion] = useState<Discussion | undefined>();
   const { toast } = useToast();
+  const [isDetailsOpen, setIsDetailsOpen] = useState(false);
+  const [detailsDiscussion, setDetailsDiscussion] = useState<Discussion | null>(null);
+
 
   useEffect(() => {
     loadDiscussions();
@@ -158,7 +162,7 @@ export default function DiscussionsPage() {
   const loadDiscussions = async () => {
     try {
       setIsLoading(true);
-      
+
       const { data: discussionsData, error } = await supabase
         .from('discussions')
         .select(`
@@ -234,40 +238,7 @@ export default function DiscussionsPage() {
     },
   ];
 
-  const actions = [
-    {
-      label: 'View Discussion',
-      onClick: (discussion: Discussion) => {
-        window.location.href = `/admin/discussions/${discussion.id}`;
-      },
-    },
-    {
-      label: 'Edit Discussion',
-      onClick: (discussion: Discussion) => {
-        setSelectedDiscussion(discussion);
-        setIsModalOpen(true);
-      },
-    },
-    {
-      label: 'Toggle Visibility',
-      onClick: handleToggleVisibility,
-    },
-    {
-      label: 'Extend Expiry',
-      onClick: handleExtendExpiry,
-    },
-    {
-      label: 'Delete Discussion',
-      onClick: (discussion: Discussion) => {
-        toast({
-          title: "Delete Discussion",
-          description: `Delete ${discussion.title} - Feature coming soon!`,
-          variant: "destructive",
-        });
-      },
-      variant: 'destructive' as const,
-    },
-  ];
+
 
   const handleCreate = () => {
     setSelectedDiscussion(undefined);
@@ -302,9 +273,19 @@ export default function DiscussionsPage() {
         onExport={handleExport}
         searchPlaceholder="Search discussions..."
         filters={filters}
-        actions={actions}
+        onRowClick={(d) => { setDetailsDiscussion(d as Discussion); setIsDetailsOpen(true); }}
       />
 
+
+      <DiscussionDetailsModal
+        isOpen={isDetailsOpen}
+        onClose={() => setIsDetailsOpen(false)}
+        discussion={detailsDiscussion}
+        onEdit={() => { if (detailsDiscussion) { setSelectedDiscussion(detailsDiscussion); setIsModalOpen(true); } }}
+        onToggleVisibility={() => detailsDiscussion && handleToggleVisibility(detailsDiscussion)}
+        onExtendExpiry={() => detailsDiscussion && handleExtendExpiry(detailsDiscussion)}
+        onDelete={() => detailsDiscussion && toast({ title: 'Delete Discussion', description: `Delete ${detailsDiscussion.title} - Feature coming soon!`, variant: 'destructive' })}
+      />
       <DiscussionModal
         isOpen={isModalOpen}
         onClose={() => setIsModalOpen(false)}
