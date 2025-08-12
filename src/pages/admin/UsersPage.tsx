@@ -370,9 +370,22 @@ export default function UsersPage() {
         isOpen={isDetailsOpen}
         onClose={() => setIsDetailsOpen(false)}
         user={detailsUser}
-        onEdit={(u) => { setSelectedUser(u); setIsModalOpen(true); }}
-        onPromote={(u) => handlePromoteUser(u)}
-        onBan={(u) => handleBanUser(u)}
+        onEdit={(u) => { 
+          // Convert UserSummary to User by adding missing updated_at field
+          const userForEdit = { ...u, updated_at: new Date().toISOString() };
+          setSelectedUser(userForEdit); 
+          setIsModalOpen(true); 
+        }}
+        onPromote={(u) => {
+          // Convert UserSummary to User by adding missing updated_at field
+          const userForPromotion = { ...u, updated_at: new Date().toISOString() };
+          handlePromoteUser(userForPromotion);
+        }}
+        onBan={(u) => {
+          // Convert UserSummary to User by adding missing updated_at field  
+          const userForBan = { ...u, updated_at: new Date().toISOString() };
+          handleBanUser(userForBan);
+        }}
       />
     </div>
   );

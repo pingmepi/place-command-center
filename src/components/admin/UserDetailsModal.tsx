@@ -30,9 +30,9 @@ interface UserDetailsModalProps {
   isOpen: boolean;
   onClose: () => void;
   user: UserSummary | null;
-  onEdit?: () => void;
-  onPromote?: () => void;
-  onBan?: () => void;
+  onEdit?: (user: UserSummary) => void;
+  onPromote?: (user: UserSummary) => void;
+  onBan?: (user: UserSummary) => void;
 }
 
 const safeString = (v: unknown): string => {
@@ -218,13 +218,13 @@ export function UserDetailsModal({ isOpen, onClose, user, onEdit, onPromote, onB
           {/* Actions (replaces table dropdown) */}
           <div className="flex items-center justify-end gap-2 pt-2">
             {onPromote && (
-              <Button variant="outline" onClick={onPromote} className="gap-2"><Shield className="h-4 w-4"/> Promote to Admin</Button>
+              <Button variant="outline" onClick={() => onPromote(user)} className="gap-2"><Shield className="h-4 w-4"/> Promote to Admin</Button>
             )}
             {onBan && (
-              <Button variant="destructive" onClick={onBan} className="gap-2"><UserX className="h-4 w-4"/> Ban User</Button>
+              <Button variant="destructive" onClick={() => onBan(user)} className="gap-2"><UserX className="h-4 w-4"/> Ban User</Button>
             )}
             {onEdit && (
-              <Button variant="default" onClick={onEdit} className="gap-2"><Edit className="h-4 w-4"/> Edit</Button>
+              <Button variant="default" onClick={() => onEdit(user)} className="gap-2"><Edit className="h-4 w-4"/> Edit</Button>
             )}
             <Button variant="outline" onClick={onClose}>Close</Button>
           </div>

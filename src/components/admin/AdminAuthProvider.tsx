@@ -36,6 +36,13 @@ export function AdminAuthProvider({ children }: { children: React.ReactNode }) {
           // Check if user has admin role
           setTimeout(async () => {
             try {
+              // Validate session before making DB calls
+              const { data: { session: currentSession } } = await supabase.auth.getSession();
+              if (!currentSession) {
+                setIsAdmin(false);
+                return;
+              }
+
               const { data: userData, error } = await supabase
                 .from('users')
                 .select('role')
@@ -57,6 +64,17 @@ export function AdminAuthProvider({ children }: { children: React.ReactNode }) {
             } catch (error) {
               console.error('Error checking admin status:', error);
               setIsAdmin(false);
+              
+              // Handle session expiry
+              if (error instanceof Error && error.message.includes('JWT')) {
+                toast({
+                  title: "Session Expired",
+                  description: "Please sign in again.",
+                  variant: "destructive",
+                });
+                setUser(null);
+                setSession(null);
+              }
             }
           }, 0);
         } else {
@@ -106,22 +124,41 @@ export function AdminAuthProvider({ children }: { children: React.ReactNode }) {
 
   const signOut = async () => {
     try {
+      // Clear local state first to ensure UI updates even if logout fails
+      setIsAdmin(false);
+      setUser(null);
+      setSession(null);
+      
+      // Attempt to sign out from Supabase
       const { error } = await supabase.auth.signOut();
+      
       if (error) {
-        toast({
-          title: "Sign Out Failed",
-          description: error.message,
-          variant: "destructive",
-        });
-      } else {
-        setIsAdmin(false);
-        toast({
-          title: "Signed Out",
-          description: "You have been successfully signed out.",
-        });
+        console.warn('Supabase sign out error:', error);
+        // Don't show error for session not found - user is already logged out
+        if (!error.message.includes('session_not_found') && !error.message.includes('Session not found')) {
+          toast({
+            title: "Sign Out Warning",
+            description: "Logged out locally. Some session data may persist.",
+            variant: "destructive",
+          });
+        }
       }
+      
+      toast({
+        title: "Signed Out",
+        description: "You have been successfully signed out.",
+      });
     } catch (error) {
       console.error('Sign out error:', error);
+      // Ensure local state is cleared even on error
+      setIsAdmin(false);
+      setUser(null);
+      setSession(null);
+      
+      toast({
+        title: "Signed Out",
+        description: "Logged out locally due to error.",
+      });
     }
   };
 
