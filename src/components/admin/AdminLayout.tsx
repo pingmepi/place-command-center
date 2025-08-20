@@ -48,7 +48,7 @@ const navigationItems = [
   {
     title: 'Overview',
     items: [
-      { title: 'Dashboard', url: '/admin', icon: BarChart3 },
+      { title: 'Dashboard', url: '/admin/dashboard', icon: BarChart3 },
       { title: 'Analytics', url: '/admin/analytics', icon: TrendingUp },
     ],
   },

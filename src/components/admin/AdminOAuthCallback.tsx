@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Shield } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
@@ -11,39 +11,66 @@ export function AdminOAuthCallback() {
   useEffect(() => {
     const handleOAuthCallback = async () => {
       try {
-        // Handle the OAuth callback by extracting the session from the URL
+        const url = new URL(window.location.href);
+
+        // Handle PKCE (code) flow first
+        const code = url.searchParams.get('code');
+        if (code) {
+          const { error } = await supabase.auth.exchangeCodeForSession(window.location.href);
+          if (error) {
+            console.error('OAuth code exchange error:', error);
+            toast({ title: 'Authentication Error', description: error.message, variant: 'destructive' });
+            navigate('/admin/login', { replace: true });
+            return;
+          }
+          // Clean up URL hash to avoid leaving tokens in the address bar
+          window.history.replaceState({}, document.title, `${url.origin}${url.pathname}`);
+          navigate('/admin/dashboard', { replace: true });
+          return;
+        }
+
+        // Handle implicit flow with tokens in URL hash
+        if (url.hash) {
+          const hashParams = new URLSearchParams(url.hash.substring(1));
+          const accessToken = hashParams.get('access_token') || undefined;
+          const refreshToken = hashParams.get('refresh_token') || undefined;
+
+          if (accessToken) {
+            const { error } = await supabase.auth.setSession({
+              access_token: accessToken,
+              refresh_token: refreshToken,
+            });
+            if (error) {
+              console.error('Set session from hash error:', error);
+              toast({ title: 'Authentication Error', description: error.message, variant: 'destructive' });
+              navigate('/admin/login', { replace: true });
+              return;
+            }
+            // Clean up URL hash to avoid leaving tokens in the address bar
+            window.history.replaceState({}, document.title, `${url.origin}${url.pathname}`);
+            navigate('/admin/dashboard', { replace: true });
+            return;
+          }
+        }
+
+        // Fallback: check for existing session
         const { data, error } = await supabase.auth.getSession();
-        
         if (error) {
           console.error('OAuth callback error:', error);
-          toast({
-            title: "Authentication Error",
-            description: error.message,
-            variant: "destructive",
-          });
+          toast({ title: 'Authentication Error', description: error.message, variant: 'destructive' });
           navigate('/admin/login', { replace: true });
           return;
         }
 
         if (data.session) {
-          // Session established successfully, redirect to admin dashboard
-          navigate('/admin', { replace: true });
+          navigate('/admin/dashboard', { replace: true });
         } else {
-          // No session found, redirect back to login
-          toast({
-            title: "Authentication Failed",
-            description: "No valid session found. Please try again.",
-            variant: "destructive",
-          });
+          toast({ title: 'Authentication Failed', description: 'No valid session found. Please try again.', variant: 'destructive' });
           navigate('/admin/login', { replace: true });
         }
       } catch (err) {
         console.error('Unexpected error during OAuth callback:', err);
-        toast({
-          title: "Authentication Error",
-          description: "An unexpected error occurred during authentication.",
-          variant: "destructive",
-        });
+        toast({ title: 'Authentication Error', description: 'An unexpected error occurred during authentication.', variant: 'destructive' });
         navigate('/admin/login', { replace: true });
       }
     };
