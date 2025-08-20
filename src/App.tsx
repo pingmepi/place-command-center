@@ -11,6 +11,7 @@ import { ErrorBoundary } from "@/components/common/ErrorBoundary";
 // Admin imports
 import { AdminAuthProvider } from "@/components/admin/AdminAuthProvider";
 import { AdminLoginPage } from "@/components/admin/AdminLoginPage";
+import { AdminOAuthCallback } from "@/components/admin/AdminOAuthCallback";
 import { AdminLayout } from "@/components/admin/AdminLayout";
 import { ProtectedAdminRoute } from "@/components/admin/ProtectedAdminRoute";
 import AdminDashboard from "@/pages/admin/AdminDashboard";
@@ -43,6 +44,7 @@ const App = () => (
 
                 {/* Admin Routes */}
                 <Route path="/admin/login" element={<AdminLoginPage />} />
+                <Route path="/admin/callback" element={<AdminOAuthCallback />} />
                 <Route path="/admin" element={
                   <ProtectedAdminRoute>
                     <AdminLayout />
