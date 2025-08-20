@@ -18,7 +18,7 @@ export function AdminLoginPage() {
   const { signIn, isAdmin, user, isLoading: authLoading } = useAdminAuth();
   const navigate = useNavigate();
   const location = useLocation();
-  const from = (location.state as any)?.from?.pathname || '/admin';
+  const from = (location.state as any)?.from?.pathname || '/admin/dashboard';
 
   useEffect(() => {
     if (!authLoading && user && isAdmin) {
@@ -50,7 +50,8 @@ export function AdminLoginPage() {
       const { error } = await supabase.auth.signInWithOAuth({
         provider: 'google',
         options: {
-          redirectTo: `${window.location.origin}/admin/callback`
+          redirectTo: `${window.location.origin}/admin/callback`,
+          queryParams: { access_type: 'offline', prompt: 'consent' }
         }
       });
       
