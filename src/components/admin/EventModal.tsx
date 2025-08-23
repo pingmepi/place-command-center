@@ -46,6 +46,7 @@ interface Event {
   image_url?: string;
   community_id: string;
   host_id?: string;
+  is_cancelled?: boolean;
 }
 
 interface Community {
@@ -87,6 +88,8 @@ export function EventModal({ isOpen, onClose, onSuccess, event }: EventModalProp
       host_id: event?.host_id || '',
     },
   });
+
+  const isReadOnly = isEditing && event?.is_cancelled === true;
 
   // Reset form values when event data changes
   React.useEffect(() => {
@@ -144,6 +147,16 @@ export function EventModal({ isOpen, onClose, onSuccess, event }: EventModalProp
 
   const onSubmit = async (data: EventFormData) => {
     try {
+      // Frontend enforcement: prevent editing if event is cancelled
+      if (isEditing && event?.is_cancelled) {
+        toast({
+          title: "Cannot Edit Cancelled Event",
+          description: "This event has been cancelled and can no longer be edited.",
+          variant: "destructive",
+        });
+        return;
+      }
+
       const eventData = {
         ...data,
         date_time: data.date_time.toISOString(),
@@ -155,7 +168,8 @@ export function EventModal({ isOpen, onClose, onSuccess, event }: EventModalProp
         const { error } = await supabase
           .from('events')
           .update(eventData)
-          .eq('id', event.id);
+          .eq('id', event.id)
+          .neq('is_cancelled', true); // Backend safety at query level
 
         if (error) throw error;
 
@@ -214,8 +228,15 @@ export function EventModal({ isOpen, onClose, onSuccess, event }: EventModalProp
           </DialogTitle>
         </DialogHeader>
 
+        {isReadOnly && (
+          <div className="mb-4 p-3 border rounded-md bg-destructive/10 text-destructive text-sm">
+            This event has been cancelled and is now read-only. You can view details but cannot make changes.
+          </div>
+        )}
+
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+            <fieldset disabled={isReadOnly} className={isReadOnly ? 'opacity-80' : ''}>
             <FormField
               control={form.control}
               name="title"
@@ -461,9 +482,9 @@ export function EventModal({ isOpen, onClose, onSuccess, event }: EventModalProp
               <Button type="button" variant="outline" onClick={handleClose}>
                 Cancel
               </Button>
-              <Button 
-                type="submit" 
-                disabled={form.formState.isSubmitting}
+              <Button
+                type="submit"
+                disabled={form.formState.isSubmitting || isReadOnly}
                 className="admin-focus"
               >
                 {form.formState.isSubmitting && (
@@ -472,6 +493,7 @@ export function EventModal({ isOpen, onClose, onSuccess, event }: EventModalProp
                 {isEditing ? 'Update' : 'Create'} Event
               </Button>
             </div>
+            </fieldset>
           </form>
         </Form>
       </DialogContent>

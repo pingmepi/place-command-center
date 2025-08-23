@@ -112,7 +112,7 @@ export function EventDetailsModal({ isOpen, onClose, event, onSuccess, onViewReg
           <DialogHeader>
             <DialogTitle className="flex items-center justify-between">
               <span>Event Details</span>
-              <Button onClick={handleEdit} size="sm">
+              <Button onClick={handleEdit} size="sm" disabled={event.is_cancelled} title={event.is_cancelled ? 'Cancelled events cannot be edited' : undefined}>
                 <Edit className="h-4 w-4 mr-2" />
                 Edit Event
               </Button>
@@ -274,7 +274,7 @@ export function EventDetailsModal({ isOpen, onClose, event, onSuccess, onViewReg
               {onCancel && (
                 <AlertDialog>
                   <AlertDialogTrigger asChild>
-                    <Button variant="destructive" className="gap-2">Cancel Event</Button>
+                    <Button variant="destructive" className="gap-2" disabled={event.is_cancelled} title={event.is_cancelled ? 'Event is already cancelled' : undefined}>Cancel Event</Button>
                   </AlertDialogTrigger>
                   <AlertContent>
                     <AlertHeader>
