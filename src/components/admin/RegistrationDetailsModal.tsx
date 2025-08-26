@@ -177,7 +177,7 @@ export function RegistrationDetailsModal({
               {registration.event.price && registration.event.price > 0 && (
                 <div className="flex items-center gap-2 text-sm text-muted-foreground">
                   <CreditCard className="h-4 w-4" />
-                  ₹{registration.event.price}
+                  {new Intl.NumberFormat(undefined, { style: 'currency', currency: registration.event.currency || 'INR' }).format(Number(registration.event.price))}
                 </div>
               )}
             </div>

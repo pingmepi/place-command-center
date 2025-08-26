@@ -16,6 +16,7 @@ import { Loader2, Calendar as CalendarIcon } from 'lucide-react';
 import { format } from 'date-fns';
 import { FileUpload } from '@/components/ui/file-upload';
 import { cn } from '@/lib/utils';
+import { useCurrency } from '@/context/CurrencyProvider';
 
 const eventSchema = z.object({
   title: z.string().min(1, 'Title is required').max(200, 'Title must be less than 200 characters'),
@@ -72,6 +73,7 @@ export function EventModal({ isOpen, onClose, onSuccess, event }: EventModalProp
   const [communities, setCommunities] = useState<Community[]>([]);
   const [users, setUsers] = useState<User[]>([]);
   const isEditing = !!event;
+  const { code: defaultCurrencyCode, currencies } = useCurrency();
 
   const form = useForm<EventFormData>({
     resolver: zodResolver(eventSchema),
@@ -82,7 +84,7 @@ export function EventModal({ isOpen, onClose, onSuccess, event }: EventModalProp
       venue: event?.venue || '',
       capacity: event?.capacity || 50,
       price: event?.price || 0,
-      currency: event?.currency || 'INR',
+      currency: event?.currency || defaultCurrencyCode,
       image_url: event?.image_url || '',
       community_id: event?.community_id || '',
       host_id: event?.host_id || '',
@@ -101,7 +103,7 @@ export function EventModal({ isOpen, onClose, onSuccess, event }: EventModalProp
         venue: event?.venue || '',
         capacity: event?.capacity || 50,
         price: event?.price || 0,
-        currency: event?.currency || 'INR',
+        currency: event?.currency || defaultCurrencyCode,
         image_url: event?.image_url || '',
         community_id: event?.community_id || '',
         host_id: event?.host_id || '',
@@ -466,8 +468,10 @@ export function EventModal({ isOpen, onClose, onSuccess, event }: EventModalProp
                           <SelectValue placeholder="Currency" />
                         </SelectTrigger>
                       </FormControl>
-                      <SelectContent>
-                        <SelectItem value="INR">₹ (Rupees)</SelectItem>
+                      <SelectContent className="max-h-72">
+                        {currencies.map(c => (
+                          <SelectItem key={c.code} value={c.code}>{c.code} — {c.name} ({c.symbol})</SelectItem>
+                        ))}
                       </SelectContent>
                     </Select>
                     <FormMessage />

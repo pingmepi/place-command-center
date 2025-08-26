@@ -29,49 +29,53 @@ import SystemSettingsPage from "@/pages/admin/SystemSettingsPage";
 
 const queryClient = new QueryClient();
 
+import { CurrencyProvider } from '@/context/CurrencyProvider';
+
 const App = () => (
   <QueryClientProvider client={queryClient}>
     <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
       <AdminAuthProvider>
-        <TooltipProvider>
-          <Toaster />
-          <Sonner />
-          <BrowserRouter>
-            <ErrorBoundary>
-              <Routes>
-                {/* Public Routes */}
-                <Route path="/" element={<Navigate to="/admin" replace />} />
+        <CurrencyProvider>
+          <TooltipProvider>
+            <Toaster />
+            <Sonner />
+            <BrowserRouter>
+              <ErrorBoundary>
+                <Routes>
+                  {/* Public Routes */}
+                  <Route path="/" element={<Navigate to="/admin" replace />} />
 
-                {/* Admin Routes */}
-                <Route path="/admin/login" element={<AdminLoginPage />} />
-                <Route path="/admin/callback" element={<AdminOAuthCallback />} />
-                <Route path="/admin" element={
-                  <ProtectedAdminRoute>
-                    <AdminLayout />
-                  </ProtectedAdminRoute>
-                }>
-                  {/* Redirect bare /admin to /admin/dashboard */}
-                  <Route index element={<Navigate to="/admin/dashboard" replace />} />
-                  <Route path="dashboard" element={<AdminDashboard />} />
-                  <Route path="communities" element={<CommunitiesPage />} />
-                  <Route path="communities/:id" element={<CommunityDetailsPage />} />
-                  <Route path="events" element={<EventsPage />} />
-                  <Route path="users" element={<UsersPage />} />
-                  <Route path="discussions" element={<DiscussionsPage />} />
-                  <Route path="discussions/:id" element={<DiscussionDetailsPage />} />
-                  <Route path="registrations" element={<RegistrationsPage />} />
-                  <Route path="moderation" element={<ModerationPage />} />
-                  <Route path="analytics" element={<AnalyticsPage />} />
-                  <Route path="advanced-users" element={<AdvancedUserManagementPage />} />
-                  <Route path="settings" element={<SystemSettingsPage />} />
-                </Route>
+                  {/* Admin Routes */}
+                  <Route path="/admin/login" element={<AdminLoginPage />} />
+                  <Route path="/admin/callback" element={<AdminOAuthCallback />} />
+                  <Route path="/admin" element={
+                    <ProtectedAdminRoute>
+                      <AdminLayout />
+                    </ProtectedAdminRoute>
+                  }>
+                    {/* Redirect bare /admin to /admin/dashboard */}
+                    <Route index element={<Navigate to="/admin/dashboard" replace />} />
+                    <Route path="dashboard" element={<AdminDashboard />} />
+                    <Route path="communities" element={<CommunitiesPage />} />
+                    <Route path="communities/:id" element={<CommunityDetailsPage />} />
+                    <Route path="events" element={<EventsPage />} />
+                    <Route path="users" element={<UsersPage />} />
+                    <Route path="discussions" element={<DiscussionsPage />} />
+                    <Route path="discussions/:id" element={<DiscussionDetailsPage />} />
+                    <Route path="registrations" element={<RegistrationsPage />} />
+                    <Route path="moderation" element={<ModerationPage />} />
+                    <Route path="analytics" element={<AnalyticsPage />} />
+                    <Route path="advanced-users" element={<AdvancedUserManagementPage />} />
+                    <Route path="settings" element={<SystemSettingsPage />} />
+                  </Route>
 
-                {/* Catch-all route */}
-                <Route path="*" element={<NotFound />} />
-              </Routes>
-            </ErrorBoundary>
-          </BrowserRouter>
-        </TooltipProvider>
+                  {/* Catch-all route */}
+                  <Route path="*" element={<NotFound />} />
+                </Routes>
+              </ErrorBoundary>
+            </BrowserRouter>
+          </TooltipProvider>
+        </CurrencyProvider>
       </AdminAuthProvider>
     </ThemeProvider>
   </QueryClientProvider>

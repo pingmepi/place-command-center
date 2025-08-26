@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { DataTable, Column } from '@/components/admin/DataTable';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -9,6 +9,7 @@ import { useToast } from '@/hooks/use-toast';
 import { EventModal } from '@/components/admin/EventModal';
 import { EventRegistrationsModal } from '@/components/admin/EventRegistrationsModal';
 import { EventDetailsModal } from '@/components/admin/EventDetailsModal';
+import { useCurrency } from '@/context/CurrencyProvider';
 
 interface Event {
   id: string;
@@ -53,7 +54,7 @@ const getInitials = (name?: string): string => {
 };
 
 
-const columns: Column<Event>[] = [
+const createColumns = (formatCurrency: (value: number, code?: string) => string): Column<Event>[] => [
   {
     key: 'title',
     header: 'Event',
@@ -157,7 +158,7 @@ const columns: Column<Event>[] = [
         <DollarSign className="h-4 w-4 text-muted-foreground" />
         <span>
           {value && value > 0
-            ? `₹${value}`
+            ? formatCurrency(Number(value), row.currency || undefined)
             : 'Free'
           }
         </span>
@@ -195,6 +196,9 @@ export default function EventsPage() {
   const [isRegistrationsModalOpen, setIsRegistrationsModalOpen] = useState(false);
   const [isEventDetailsModalOpen, setIsEventDetailsModalOpen] = useState(false);
   const { toast } = useToast();
+  const { formatCurrency } = useCurrency();
+
+  const columns = useMemo(() => createColumns(formatCurrency), [formatCurrency]);
 
   useEffect(() => {
     loadEvents();

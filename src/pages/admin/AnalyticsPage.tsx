@@ -321,7 +321,7 @@ export default function AnalyticsPage() {
         <MetricCard
           title="Total Revenue"
           value={`₹${analytics.totalRevenue.toLocaleString()}`}
-          description="From event registrations"
+          description="From event registrations (INR)"
           icon={DollarSign}
         />
         <MetricCard
@@ -501,9 +501,9 @@ export default function AnalyticsPage() {
                 <AreaChart data={analytics.monthlyRevenue}>
                   <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
                   <XAxis dataKey="month" stroke="hsl(var(--muted-foreground))" />
-                  <YAxis 
+                  <YAxis
                     stroke="hsl(var(--muted-foreground))"
-                    tickFormatter={(value) => `₹${value.toLocaleString()}`}
+                    tickFormatter={(value) => `₹${Number(value).toLocaleString()}`}
                   />
                   <Tooltip 
                     contentStyle={{
@@ -511,7 +511,7 @@ export default function AnalyticsPage() {
                       border: '1px solid hsl(var(--border))',
                       borderRadius: '8px'
                     }}
-                    formatter={(value) => [`₹${value}`, 'Revenue']}
+                    formatter={(value) => [`₹${Number(value).toLocaleString()}`, 'Revenue (INR)']}
                   />
                   <Area 
                     type="monotone" 
