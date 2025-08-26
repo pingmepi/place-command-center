@@ -38,8 +38,8 @@ export default function SystemSettingsPage() {
   const [analyticsEnabled, setAnalyticsEnabled] = useState(true);
 
   // Currency Settings
-  const [defaultCurrency, setDefaultCurrency] = useState('Rs');
-  const [currencySymbol, setCurrencySymbol] = useState('Rs');
+  const [defaultCurrency, setDefaultCurrency] = useState('INR');
+  const [currencySymbol, setCurrencySymbol] = useState('₹');
 
   // Notification Settings
   const [emailNotifications, setEmailNotifications] = useState(true);
@@ -78,8 +78,8 @@ export default function SystemSettingsPage() {
     setEmailVerificationRequired(true);
     setModerationEnabled(true);
     setAnalyticsEnabled(true);
-    setDefaultCurrency('Rs');
-    setCurrencySymbol('Rs');
+    setDefaultCurrency('INR');
+    setCurrencySymbol('₹');
     setEmailNotifications(true);
     setPushNotifications(true);
     setSmsNotifications(false);
@@ -205,7 +205,7 @@ export default function SystemSettingsPage() {
             </div>
             <div className="p-3 bg-muted rounded-lg">
               <p className="text-sm font-medium mb-1">Preview:</p>
-              <p className="text-lg">{currencySymbol} 1,500</p>
+              <p className="text-lg">₹1,500</p>
             </div>
           </div>
         </Card>

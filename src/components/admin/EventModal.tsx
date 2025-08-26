@@ -467,8 +467,7 @@ export function EventModal({ isOpen, onClose, onSuccess, event }: EventModalProp
                         </SelectTrigger>
                       </FormControl>
                       <SelectContent>
-                        <SelectItem value="INR">INR</SelectItem>
-                        <SelectItem value="USD">USD</SelectItem>
+                        <SelectItem value="INR">INR (₹)</SelectItem>
                         <SelectItem value="EUR">EUR</SelectItem>
                       </SelectContent>
                     </Select>

@@ -87,7 +87,7 @@ export function EventDetailsModal({ isOpen, onClose, event, onSuccess, onViewReg
 
   const formatPrice = (price?: number, currency?: string) => {
     if (!price) return 'Free';
-    return `${currency || 'INR'} ${price.toLocaleString()}`;
+    return `₹${price.toLocaleString()}`;
   };
 
   const getStatusBadge = () => {

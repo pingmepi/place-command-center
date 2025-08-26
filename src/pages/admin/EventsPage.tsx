@@ -157,7 +157,7 @@ const columns: Column<Event>[] = [
         <DollarSign className="h-4 w-4 text-muted-foreground" />
         <span>
           {value && value > 0
-            ? `${row.currency || 'INR'} ${value}`
+            ? `₹${value}`
             : 'Free'
           }
         </span>
