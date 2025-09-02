@@ -7,7 +7,7 @@ import { Switch } from '@/components/ui/switch';
 import { Textarea } from '@/components/ui/textarea';
 import { Separator } from '@/components/ui/separator';
 import { Badge } from '@/components/ui/badge';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+
 import {
   Settings,
   Mail,
@@ -20,7 +20,7 @@ import {
   RotateCcw
 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
-import { useCurrency } from '@/context/CurrencyProvider';
+
 
 export default function SystemSettingsPage() {
   const { toast } = useToast();
@@ -39,8 +39,6 @@ export default function SystemSettingsPage() {
   const [moderationEnabled, setModerationEnabled] = useState(true);
   const [analyticsEnabled, setAnalyticsEnabled] = useState(true);
 
-  // Currency Settings (derived from provider)
-  const { code: defaultCurrency, symbol: currencySymbol, setCurrency, currencies } = useCurrency();
 
   // Notification Settings
   const [emailNotifications, setEmailNotifications] = useState(true);
@@ -50,8 +48,6 @@ export default function SystemSettingsPage() {
   const handleSave = async () => {
     try {
       setIsLoading(true);
-      // Persist currency selection (already current defaultCurrency from provider)
-      await setCurrency(defaultCurrency);
       toast({
         title: "Settings Saved",
         description: "System settings have been updated successfully.",
@@ -78,7 +74,6 @@ export default function SystemSettingsPage() {
     setEmailVerificationRequired(true);
     setModerationEnabled(true);
     setAnalyticsEnabled(true);
-    await setCurrency('INR');
     setEmailNotifications(true);
     setPushNotifications(true);
     setSmsNotifications(false);
@@ -171,44 +166,7 @@ export default function SystemSettingsPage() {
           </div>
         </Card>
 
-        {/* Currency Settings */}
-        <Card className="p-6">
-          <div className="flex items-center gap-2 mb-4">
-            <span className="text-lg font-bold text-primary">{currencySymbol}</span>
-            <h2 className="text-lg font-semibold">Currency Settings</h2>
-          </div>
-          <div className="space-y-4">
-            <div>
-              <Label htmlFor="defaultCurrency">Default Currency</Label>
-              <Select onValueChange={(code) => void setCurrency(code)} value={defaultCurrency}>
-                <SelectTrigger>
-                  <SelectValue placeholder="Select currency" />
-                </SelectTrigger>
-                <SelectContent className="max-h-72">
-                  {currencies.map(c => (
-                    <SelectItem key={c.code} value={c.code}>{c.code} — {c.name} ({c.symbol})</SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-              <p className="text-sm text-muted-foreground mt-1">
-                Currency code used throughout the platform
-              </p>
-            </div>
-            <div>
-              <Label>Currency Symbol</Label>
-              <div className="p-2 border rounded-md bg-muted/50 inline-block">
-                <span className="font-medium">{currencySymbol}</span>
-              </div>
-              <p className="text-sm text-muted-foreground mt-1">
-                Derived from currency selection
-              </p>
-            </div>
-            <div className="p-3 bg-muted rounded-lg">
-              <p className="text-sm font-medium mb-1">Preview:</p>
-              <p className="text-lg">{currencySymbol}1,500</p>
-            </div>
-          </div>
-        </Card>
+
 
         {/* Feature Toggles */}
         <Card className="p-6">

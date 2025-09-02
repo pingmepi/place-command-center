@@ -13,7 +13,6 @@ import {
   Calendar,
   MapPin,
   Users,
-  DollarSign,
   Edit,
   User,
   Building,
@@ -21,6 +20,7 @@ import {
 } from 'lucide-react';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent as AlertContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader as AlertHeader, AlertDialogTitle as AlertTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
 import { EventModal } from './EventModal';
+import { useCurrency } from '@/context/CurrencyProvider';
 
 interface Event {
   id: string;
@@ -74,6 +74,8 @@ interface EventDetailsModalProps {
 export function EventDetailsModal({ isOpen, onClose, event, onSuccess, onViewRegistrations, onCancel }: EventDetailsModalProps) {
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
 
+  const { formatCurrency } = useCurrency();
+
   if (!event) return null;
 
   const handleEdit = () => {
@@ -85,14 +87,9 @@ export function EventDetailsModal({ isOpen, onClose, event, onSuccess, onViewReg
     setIsEditModalOpen(false);
   };
 
-  const formatPrice = (price?: number, currency?: string) => {
+  const formatPrice = (price?: number) => {
     if (!price) return 'Free';
-    try {
-      const nf = new Intl.NumberFormat(undefined, { style: 'currency', currency: currency || 'INR' });
-      return nf.format(price);
-    } catch {
-      return `${currency || ''} ${price.toLocaleString()}`.trim();
-    }
+    return formatCurrency(Number(price));
   };
 
   const getStatusBadge = () => {
@@ -193,10 +190,9 @@ export function EventDetailsModal({ isOpen, onClose, event, onSuccess, onViewReg
               {/* Price */}
               <div className="space-y-2">
                 <div className="flex items-center gap-2">
-                  <DollarSign className="h-4 w-4 text-primary" />
                   <span className="font-medium">Price</span>
                 </div>
-                <p className="text-sm font-medium">{formatPrice(event.price, event.currency)}</p>
+                <p className="text-sm font-medium">{formatPrice(event.price)}</p>
               </div>
             </div>
 

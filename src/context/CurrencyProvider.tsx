@@ -1,6 +1,5 @@
-import React, { createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react';
-import { supabase } from '@/integrations/supabase/client';
-import { formatCurrency as fmt, getAllCurrencies, getSymbolFor } from '@/lib/currency';
+import React, { createContext, useCallback, useContext, useMemo, useState } from 'react';
+import { formatCurrency as fmt, getSymbolFor } from '@/lib/currency';
 
 interface CurrencyState {
   code: string; // ISO code, e.g., 'INR'
@@ -19,61 +18,32 @@ const CurrencyContext = createContext<CurrencyContextType | undefined>(undefined
 
 export const CurrencyProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [state, setState] = useState<CurrencyState>({ code: 'INR' });
-  const [isLoading, setIsLoading] = useState(true);
+  const [isLoading] = useState(false);
 
-  // Precompute list for dropdowns
-  const currencies = useMemo(() => {
-    return getAllCurrencies().map(c => ({ code: c.code, name: c.currency || c.code, symbol: c.symbol }));
+  // Currency selection is removed; keep empty list for compatibility
+  const currencies = useMemo(() => [], []);
+
+  // Always use INR symbol
+  const symbol = useMemo(() => getSymbolFor('INR'), []);
+
+  // No-op setter to satisfy existing callers
+  const setCurrency = useCallback(async (_code: string) => {
+    setState({ code: 'INR' });
   }, []);
 
-  const symbol = useMemo(() => getSymbolFor(state.code), [state.code]);
-
-  const load = useCallback(async () => {
-    setIsLoading(true);
-    try {
-      const { data, error } = await supabase
-        .from('system_settings')
-        .select('value')
-        .eq('key', 'currency')
-        .maybeSingle();
-      if (error) throw error;
-      const code = (data?.value as any)?.code || 'INR';
-      setState({ code });
-    } catch (e) {
-      // fallback to INR
-      setState({ code: 'INR' });
-    } finally {
-      setIsLoading(false);
-    }
+  // Always format using INR regardless of override
+  const formatCurrency = useCallback((value: number, _codeOverride?: string, opts?: Intl.NumberFormatOptions) => {
+    return fmt(value, 'INR', opts);
   }, []);
-
-  useEffect(() => {
-    void load();
-  }, [load]);
-
-  const setCurrency = useCallback(async (code: string) => {
-    setIsLoading(true);
-    try {
-      const { error } = await supabase.from('system_settings').upsert({ key: 'currency', value: { code } }, { onConflict: 'key' });
-      if (error) throw error;
-      setState({ code });
-    } finally {
-      setIsLoading(false);
-    }
-  }, []);
-
-  const formatCurrency = useCallback((value: number, codeOverride?: string, opts?: Intl.NumberFormatOptions) => {
-    return fmt(value, codeOverride || state.code, opts);
-  }, [state.code]);
 
   const value = useMemo<CurrencyContextType>(() => ({
-    code: state.code,
+    code: 'INR',
     symbol,
     isLoading,
     currencies,
     formatCurrency,
     setCurrency,
-  }), [state.code, symbol, isLoading, currencies, formatCurrency, setCurrency]);
+  }), [symbol, isLoading, currencies, formatCurrency, setCurrency]);
 
   return (
     <CurrencyContext.Provider value={value}>

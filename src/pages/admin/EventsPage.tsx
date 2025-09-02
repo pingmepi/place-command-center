@@ -3,7 +3,7 @@ import { DataTable, Column } from '@/components/admin/DataTable';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { Plus, Calendar, MapPin, Users, DollarSign, Clock } from 'lucide-react';
+import { Plus, Calendar, MapPin, Users, Clock } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { EventModal } from '@/components/admin/EventModal';
@@ -155,10 +155,10 @@ const createColumns = (formatCurrency: (value: number, code?: string) => string)
     sortable: true,
     render: (value, row) => (
       <div className="flex items-center gap-2">
-        <DollarSign className="h-4 w-4 text-muted-foreground" />
+
         <span>
           {value && value > 0
-            ? formatCurrency(Number(value), row.currency || undefined)
+            ? formatCurrency(Number(value))
             : 'Free'
           }
         </span>

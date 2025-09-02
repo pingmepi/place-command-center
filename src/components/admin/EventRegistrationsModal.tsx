@@ -22,6 +22,7 @@ import {
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { RegistrationDetailsModal } from './RegistrationDetailsModal';
+import { useCurrency } from '@/context/CurrencyProvider';
 
 interface Registration {
   id: string;
@@ -68,6 +69,7 @@ export function EventRegistrationsModal({
   const [selectedRegistration, setSelectedRegistration] = useState<Registration | null>(null);
   const [isDetailsModalOpen, setIsDetailsModalOpen] = useState(false);
   const { toast } = useToast();
+  const { formatCurrency } = useCurrency();
 
   useEffect(() => {
     if (isOpen && eventId) {

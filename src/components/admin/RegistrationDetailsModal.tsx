@@ -22,6 +22,7 @@ import {
   XCircle,
   AlertCircle
 } from 'lucide-react';
+import { useCurrency } from '@/context/CurrencyProvider';
 
 interface Registration {
   id: string;
@@ -69,6 +70,8 @@ export function RegistrationDetailsModal({
   onRefund,
   onCancel,
 }: RegistrationDetailsModalProps) {
+
+  const { formatCurrency } = useCurrency();
 
   if (!registration) return null;
 
@@ -176,8 +179,7 @@ export function RegistrationDetailsModal({
               </div>
               {registration.event.price && registration.event.price > 0 && (
                 <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                  <CreditCard className="h-4 w-4" />
-                  {new Intl.NumberFormat(undefined, { style: 'currency', currency: registration.event.currency || 'INR' }).format(Number(registration.event.price))}
+                  {formatCurrency(Number(registration.event.price))}
                 </div>
               )}
             </div>

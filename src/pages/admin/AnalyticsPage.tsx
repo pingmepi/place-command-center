@@ -5,13 +5,13 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
-import { 
-  BarChart, 
-  Bar, 
-  XAxis, 
-  YAxis, 
-  CartesianGrid, 
-  Tooltip, 
+import {
+  BarChart,
+  Bar,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip,
   ResponsiveContainer,
   PieChart,
   Pie,
@@ -21,16 +21,17 @@ import {
   Area,
   AreaChart
 } from 'recharts';
-import { 
-  Users, 
-  Calendar, 
-  MessageSquare, 
-  TrendingUp, 
+import {
+  Users,
+  Calendar,
+  MessageSquare,
+  TrendingUp,
   Activity,
   AlertTriangle,
-  DollarSign,
   UserCheck
 } from 'lucide-react';
+
+import { useCurrency } from '@/context/CurrencyProvider';
 
 interface AnalyticsData {
   totalUsers: number;
@@ -66,7 +67,9 @@ const CHART_COLORS = [
 ];
 
 export default function AnalyticsPage() {
+  const { formatCurrency, code } = useCurrency();
   const { data: analytics, isLoading } = useQuery({
+
     queryKey: ['analytics'],
     queryFn: async (): Promise<AnalyticsData> => {
       // Fetch basic counts
@@ -243,13 +246,13 @@ export default function AnalyticsPage() {
 
   if (!analytics) return null;
 
-  const MetricCard = ({ 
-    title, 
-    value, 
-    description, 
-    icon: Icon, 
+  const MetricCard = ({
+    title,
+    value,
+    description,
+    icon: Icon,
     trend,
-    className = "" 
+    className = ""
   }: {
     title: string;
     value: string | number;
@@ -320,9 +323,9 @@ export default function AnalyticsPage() {
         />
         <MetricCard
           title="Total Revenue"
-          value={`₹${analytics.totalRevenue.toLocaleString()}`}
-          description="From event registrations (INR)"
-          icon={DollarSign}
+          value={analytics.totalRevenue}
+          description="From event registrations"
+          icon={TrendingUp}
         />
         <MetricCard
           title="User Activity"
@@ -361,16 +364,16 @@ export default function AnalyticsPage() {
                     <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
                     <XAxis dataKey="date" stroke="hsl(var(--muted-foreground))" />
                     <YAxis stroke="hsl(var(--muted-foreground))" />
-                    <Tooltip 
+                    <Tooltip
                       contentStyle={{
                         backgroundColor: 'hsl(var(--card))',
                         border: '1px solid hsl(var(--border))',
                         borderRadius: '8px'
                       }}
                     />
-                    <Area 
-                      type="monotone" 
-                      dataKey="users" 
+                    <Area
+                      type="monotone"
+                      dataKey="users"
                       stroke={COLORS.primary}
                       fill={COLORS.primary}
                       fillOpacity={0.2}
@@ -391,16 +394,16 @@ export default function AnalyticsPage() {
                     <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
                     <XAxis dataKey="date" stroke="hsl(var(--muted-foreground))" />
                     <YAxis stroke="hsl(var(--muted-foreground))" />
-                    <Tooltip 
+                    <Tooltip
                       contentStyle={{
                         backgroundColor: 'hsl(var(--card))',
                         border: '1px solid hsl(var(--border))',
                         borderRadius: '8px'
                       }}
                     />
-                    <Line 
-                      type="monotone" 
-                      dataKey="registrations" 
+                    <Line
+                      type="monotone"
+                      dataKey="registrations"
                       stroke={COLORS.success}
                       strokeWidth={2}
                     />
@@ -422,13 +425,13 @@ export default function AnalyticsPage() {
                 <ResponsiveContainer width="100%" height={300}>
                   <BarChart data={analytics.communityGrowth}>
                     <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
-                    <XAxis 
-                      dataKey="name" 
+                    <XAxis
+                      dataKey="name"
                       stroke="hsl(var(--muted-foreground))"
                       fontSize={12}
                     />
                     <YAxis stroke="hsl(var(--muted-foreground))" />
-                    <Tooltip 
+                    <Tooltip
                       contentStyle={{
                         backgroundColor: 'hsl(var(--card))',
                         border: '1px solid hsl(var(--border))',
@@ -462,7 +465,7 @@ export default function AnalyticsPage() {
                         <Cell key={`cell-${index}`} fill={entry.color} />
                       ))}
                     </Pie>
-                    <Tooltip 
+                    <Tooltip
                       contentStyle={{
                         backgroundColor: 'hsl(var(--card))',
                         border: '1px solid hsl(var(--border))',
@@ -475,9 +478,9 @@ export default function AnalyticsPage() {
                   {analytics.registrationStatus.map((item, index) => (
                     <div key={index} className="flex items-center justify-between">
                       <div className="flex items-center space-x-2">
-                        <div 
-                          className="w-3 h-3 rounded-full" 
-                          style={{ backgroundColor: item.color }} 
+                        <div
+                          className="w-3 h-3 rounded-full"
+                          style={{ backgroundColor: item.color }}
                         />
                         <span className="text-sm">{item.name}</span>
                       </div>
@@ -503,19 +506,19 @@ export default function AnalyticsPage() {
                   <XAxis dataKey="month" stroke="hsl(var(--muted-foreground))" />
                   <YAxis
                     stroke="hsl(var(--muted-foreground))"
-                    tickFormatter={(value) => `₹${Number(value).toLocaleString()}`}
+                    tickFormatter={(value) => formatCurrency(Number(value))}
                   />
-                  <Tooltip 
+                  <Tooltip
                     contentStyle={{
                       backgroundColor: 'hsl(var(--card))',
                       border: '1px solid hsl(var(--border))',
                       borderRadius: '8px'
                     }}
-                    formatter={(value) => [`₹${Number(value).toLocaleString()}`, 'Revenue (INR)']}
+                    formatter={(value) => [formatCurrency(Number(value)), `Revenue (${code})`]}
                   />
-                  <Area 
-                    type="monotone" 
-                    dataKey="revenue" 
+                  <Area
+                    type="monotone"
+                    dataKey="revenue"
                     stroke={COLORS.success}
                     fill={COLORS.success}
                     fillOpacity={0.2}
@@ -537,13 +540,13 @@ export default function AnalyticsPage() {
                 <BarChart data={analytics.userActivity} layout="horizontal">
                   <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
                   <XAxis type="number" stroke="hsl(var(--muted-foreground))" />
-                  <YAxis 
-                    dataKey="action" 
-                    type="category" 
+                  <YAxis
+                    dataKey="action"
+                    type="category"
                     stroke="hsl(var(--muted-foreground))"
                     fontSize={12}
                   />
-                  <Tooltip 
+                  <Tooltip
                     contentStyle={{
                       backgroundColor: 'hsl(var(--card))',
                       border: '1px solid hsl(var(--border))',
