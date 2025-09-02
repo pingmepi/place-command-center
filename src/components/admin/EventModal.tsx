@@ -26,7 +26,6 @@ const eventSchema = z.object({
   venue: z.string().min(1, 'Venue is required').max(200, 'Venue must be less than 200 characters'),
   capacity: z.number().min(1, 'Capacity must be at least 1').max(10000, 'Capacity must be less than 10,000'),
   price: z.number().min(0, 'Price cannot be negative').optional(),
-  currency: z.string().optional(),
   image_url: z.string().optional(),
   community_id: z.string().min(1, 'Community is required'),
   host_id: z.string().optional(),
@@ -42,7 +41,6 @@ interface Event {
   venue: string;
   capacity: number;
   price?: number;
-  currency?: string;
   image_url?: string;
   community_id: string;
   host_id?: string;
@@ -82,7 +80,6 @@ export function EventModal({ isOpen, onClose, onSuccess, event }: EventModalProp
       venue: event?.venue || '',
       capacity: event?.capacity || 50,
       price: event?.price || 0,
-      currency: event?.currency || 'INR',
       image_url: event?.image_url || '',
       community_id: event?.community_id || '',
       host_id: event?.host_id || '',
@@ -101,7 +98,6 @@ export function EventModal({ isOpen, onClose, onSuccess, event }: EventModalProp
         venue: event?.venue || '',
         capacity: event?.capacity || 50,
         price: event?.price || 0,
-        currency: event?.currency || 'INR',
         image_url: event?.image_url || '',
         community_id: event?.community_id || '',
         host_id: event?.host_id || '',
@@ -187,7 +183,6 @@ export function EventModal({ isOpen, onClose, onSuccess, event }: EventModalProp
             venue: eventData.venue,
             capacity: eventData.capacity,
             price: eventData.price,
-            currency: eventData.currency,
             image_url: eventData.image_url || null,
             community_id: eventData.community_id,
             host_id: eventData.host_id,
@@ -454,26 +449,6 @@ export function EventModal({ isOpen, onClose, onSuccess, event }: EventModalProp
                 )}
               />
 
-              <FormField
-                control={form.control}
-                name="currency"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Currency</FormLabel>
-                    <Select onValueChange={field.onChange} defaultValue={field.value}>
-                      <FormControl>
-                        <SelectTrigger>
-                          <SelectValue placeholder="Currency" />
-                        </SelectTrigger>
-                      </FormControl>
-                      <SelectContent>
-                        <SelectItem value="INR">₹ (Rupees)</SelectItem>
-                      </SelectContent>
-                    </Select>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
             </div>
 
             <div className="flex justify-end space-x-2 pt-4">

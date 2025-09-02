@@ -1,14 +1,15 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { DataTable, Column } from '@/components/admin/DataTable';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { Plus, Calendar, MapPin, Users, DollarSign, Clock } from 'lucide-react';
+import { Plus, Calendar, MapPin, Users, Clock } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { EventModal } from '@/components/admin/EventModal';
 import { EventRegistrationsModal } from '@/components/admin/EventRegistrationsModal';
 import { EventDetailsModal } from '@/components/admin/EventDetailsModal';
+import { useCurrency } from '@/context/CurrencyProvider';
 
 interface Event {
   id: string;
@@ -53,7 +54,7 @@ const getInitials = (name?: string): string => {
 };
 
 
-const columns: Column<Event>[] = [
+const createColumns = (formatCurrency: (value: number, code?: string) => string): Column<Event>[] => [
   {
     key: 'title',
     header: 'Event',
@@ -154,10 +155,10 @@ const columns: Column<Event>[] = [
     sortable: true,
     render: (value, row) => (
       <div className="flex items-center gap-2">
-        <DollarSign className="h-4 w-4 text-muted-foreground" />
+
         <span>
           {value && value > 0
-            ? `₹${value}`
+            ? formatCurrency(Number(value))
             : 'Free'
           }
         </span>
@@ -195,6 +196,9 @@ export default function EventsPage() {
   const [isRegistrationsModalOpen, setIsRegistrationsModalOpen] = useState(false);
   const [isEventDetailsModalOpen, setIsEventDetailsModalOpen] = useState(false);
   const { toast } = useToast();
+  const { formatCurrency } = useCurrency();
+
+  const columns = useMemo(() => createColumns(formatCurrency), [formatCurrency]);
 
   useEffect(() => {
     loadEvents();

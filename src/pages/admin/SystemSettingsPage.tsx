@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -7,18 +7,20 @@ import { Switch } from '@/components/ui/switch';
 import { Textarea } from '@/components/ui/textarea';
 import { Separator } from '@/components/ui/separator';
 import { Badge } from '@/components/ui/badge';
-import { 
-  Settings, 
-  Mail, 
-  Bell, 
-  Shield, 
-  Database, 
-  Palette, 
+
+import {
+  Settings,
+  Mail,
+  Bell,
+  Shield,
+  Database,
+  Palette,
   Globe,
   Save,
   RotateCcw
 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
+
 
 export default function SystemSettingsPage() {
   const { toast } = useToast();
@@ -37,9 +39,6 @@ export default function SystemSettingsPage() {
   const [moderationEnabled, setModerationEnabled] = useState(true);
   const [analyticsEnabled, setAnalyticsEnabled] = useState(true);
 
-  // Currency Settings
-  const [defaultCurrency, setDefaultCurrency] = useState('INR');
-  const [currencySymbol, setCurrencySymbol] = useState('₹');
 
   // Notification Settings
   const [emailNotifications, setEmailNotifications] = useState(true);
@@ -49,9 +48,6 @@ export default function SystemSettingsPage() {
   const handleSave = async () => {
     try {
       setIsLoading(true);
-      // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      
       toast({
         title: "Settings Saved",
         description: "System settings have been updated successfully.",
@@ -67,7 +63,7 @@ export default function SystemSettingsPage() {
     }
   };
 
-  const handleReset = () => {
+  const handleReset = async () => {
     // Reset to defaults
     setPlatformName('Community Platform');
     setPlatformDescription('Connect, engage, and grow your community');
@@ -78,8 +74,6 @@ export default function SystemSettingsPage() {
     setEmailVerificationRequired(true);
     setModerationEnabled(true);
     setAnalyticsEnabled(true);
-    setDefaultCurrency('INR');
-    setCurrencySymbol('₹');
     setEmailNotifications(true);
     setPushNotifications(true);
     setSmsNotifications(false);
@@ -172,43 +166,7 @@ export default function SystemSettingsPage() {
           </div>
         </Card>
 
-        {/* Currency Settings */}
-        <Card className="p-6">
-          <div className="flex items-center gap-2 mb-4">
-            <span className="text-lg font-bold text-primary">Rs</span>
-            <h2 className="text-lg font-semibold">Currency Settings</h2>
-          </div>
-          <div className="space-y-4">
-            <div>
-              <Label htmlFor="defaultCurrency">Default Currency</Label>
-              <Input
-                id="defaultCurrency"
-                value={defaultCurrency}
-                onChange={(e) => setDefaultCurrency(e.target.value)}
-                placeholder="Rs"
-              />
-              <p className="text-sm text-muted-foreground mt-1">
-                Currency code used throughout the platform
-              </p>
-            </div>
-            <div>
-              <Label htmlFor="currencySymbol">Currency Symbol</Label>
-              <Input
-                id="currencySymbol"
-                value={currencySymbol}
-                onChange={(e) => setCurrencySymbol(e.target.value)}
-                placeholder="Rs"
-              />
-              <p className="text-sm text-muted-foreground mt-1">
-                Symbol displayed with prices
-              </p>
-            </div>
-            <div className="p-3 bg-muted rounded-lg">
-              <p className="text-sm font-medium mb-1">Preview:</p>
-              <p className="text-lg">₹1,500</p>
-            </div>
-          </div>
-        </Card>
+
 
         {/* Feature Toggles */}
         <Card className="p-6">
