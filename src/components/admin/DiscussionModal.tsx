@@ -16,6 +16,7 @@ import { useToast } from '@/hooks/use-toast';
 import { Loader2, Calendar as CalendarIcon } from 'lucide-react';
 import { format, addDays } from 'date-fns';
 import { cn } from '@/lib/utils';
+import { logActivity } from '@/lib/activity';
 
 const discussionSchema = z.object({
   title: z.string().min(1, 'Title is required').max(200, 'Title must be less than 200 characters'),
@@ -122,7 +123,7 @@ export function DiscussionModal({ isOpen, onClose, onSuccess, discussion }: Disc
           return;
         }
 
-        const { error } = await supabase
+        const { data: inserted, error } = await supabase
           .from('discussions')
           .insert([{
             title: discussionData.title,
@@ -132,9 +133,23 @@ export function DiscussionModal({ isOpen, onClose, onSuccess, discussion }: Disc
             is_visible: discussionData.is_visible,
             extended: discussionData.extended,
             created_by: user.id,
-          }]);
+          }])
+          .select('id, title, community_id, expires_at')
+          .single();
 
         if (error) throw error;
+
+        // Log activity (non-blocking)
+        await logActivity({
+          action_type: 'discussion_created',
+          target_type: 'discussion',
+          target_id: inserted?.id,
+          metadata: {
+            title: inserted?.title,
+            community_id: inserted?.community_id,
+            expires_at: inserted?.expires_at,
+          },
+        });
 
         toast({
           title: "Discussion Created",

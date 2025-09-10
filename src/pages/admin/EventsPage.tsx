@@ -10,6 +10,7 @@ import { EventModal } from '@/components/admin/EventModal';
 import { EventRegistrationsModal } from '@/components/admin/EventRegistrationsModal';
 import { EventDetailsModal } from '@/components/admin/EventDetailsModal';
 import { useCurrency } from '@/context/CurrencyProvider';
+import { normalizeCity } from '@/lib/city';
 
 interface Event {
   id: string;
@@ -108,7 +109,7 @@ const createColumns = (formatCurrency: (value: number, code?: string) => string)
         <MapPin className="h-4 w-4 text-muted-foreground" />
         <div>
           <p className="text-sm font-medium">{row.community.name}</p>
-          <p className="text-xs text-muted-foreground">{row.community.city}</p>
+          <p className="text-xs text-muted-foreground">{normalizeCity(row.community.city)}</p>
         </div>
       </div>
     ),

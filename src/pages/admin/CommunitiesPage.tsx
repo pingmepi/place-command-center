@@ -8,6 +8,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { CommunityModal } from '@/components/admin/CommunityModal';
 import { CommunityDetailsModal } from '@/components/admin/CommunityDetailsModal';
+import { normalizeCity, uniqueSortedCities } from '@/lib/city';
 
 interface Community {
   id: string;
@@ -71,7 +72,7 @@ const columns: Column<Community>[] = [
     render: (value) => (
       <div className="flex items-center gap-2">
         <MapPin className="h-4 w-4 text-muted-foreground" />
-        <span>{value}</span>
+        <span>{normalizeCity(String(value))}</span>
       </div>
     ),
   },
@@ -179,8 +180,8 @@ export default function CommunitiesPage() {
     });
   };
 
-  // Get unique cities for filtering
-  const cities = [...new Set(communities.map(c => c.city))].map(city => ({
+  // Get unique standardized cities for filtering
+  const cities = uniqueSortedCities(communities.map(c => c.city)).map(city => ({
     value: city,
     label: city,
   }));

@@ -11,6 +11,9 @@ import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { FileUpload } from '@/components/ui/file-upload';
 import { Loader2 } from 'lucide-react';
+import { CityPicker } from '@/components/common/CityPicker';
+import { normalizeCity } from '@/lib/city';
+import { logActivity } from '@/lib/activity';
 
 const communitySchema = z.object({
   name: z.string().min(1, 'Name is required').max(100, 'Name must be less than 100 characters'),
@@ -64,33 +67,45 @@ export function CommunityModal({ isOpen, onClose, onSuccess, community }: Commun
 
   const onSubmit = async (data: CommunityFormData) => {
     try {
+      const payload = {
+        name: data.name.trim(),
+        city: normalizeCity(data.city),
+        description: data.description?.trim() || null,
+        image_url: data.image_url || null,
+      };
+
       if (isEditing) {
         const { error } = await supabase
           .from('communities')
-          .update(data)
+          .update(payload)
           .eq('id', community.id);
 
         if (error) throw error;
 
         toast({
           title: "Community Updated",
-          description: `${data.name} has been updated successfully.`,
+          description: `${payload.name} has been updated successfully.`,
         });
       } else {
-        const { error } = await supabase
+        const { data: inserted, error } = await supabase
           .from('communities')
-          .insert([{
-            name: data.name,
-            city: data.city,
-            description: data.description || null,
-            image_url: data.image_url || null,
-          }]);
+          .insert([payload])
+          .select('id, name, city')
+          .single();
 
         if (error) throw error;
 
+        // Log activity (non-blocking)
+        await logActivity({
+          action_type: 'community_created',
+          target_type: 'community',
+          target_id: inserted?.id,
+          metadata: { name: inserted?.name, city: inserted?.city },
+        });
+
         toast({
           title: "Community Created",
-          description: `${data.name} has been created successfully.`,
+          description: `${payload.name} has been created successfully.`,
         });
       }
 
@@ -144,7 +159,12 @@ export function CommunityModal({ isOpen, onClose, onSuccess, community }: Commun
                 <FormItem>
                   <FormLabel>City</FormLabel>
                   <FormControl>
-                    <Input placeholder="Enter city" {...field} />
+                    <CityPicker
+                      value={field.value}
+                      onChange={(v) => field.onChange(v)}
+                      placeholder="Select or type a city"
+                      allowCustom
+                    />
                   </FormControl>
                   <FormMessage />
                 </FormItem>

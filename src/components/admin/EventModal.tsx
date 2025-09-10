@@ -16,6 +16,7 @@ import { Loader2, Calendar as CalendarIcon } from 'lucide-react';
 import { format } from 'date-fns';
 import { FileUpload } from '@/components/ui/file-upload';
 import { cn } from '@/lib/utils';
+import { logActivity } from '@/lib/activity';
 
 const eventSchema = z.object({
   title: z.string().min(1, 'Title is required').max(200, 'Title must be less than 200 characters'),
@@ -120,7 +121,8 @@ export function EventModal({ isOpen, onClose, onSuccess, event }: EventModalProp
         .order('name');
 
       if (error) throw error;
-      setCommunities(data || []);
+      const normalized = (data || []).map((c: any) => ({ ...c, city: (c.city || '').trim() }));
+      setCommunities(normalized as Community[]);
     } catch (error) {
       console.error('Error loading communities:', error);
     }
@@ -174,7 +176,7 @@ export function EventModal({ isOpen, onClose, onSuccess, event }: EventModalProp
           description: `${data.title} has been updated successfully.`,
         });
       } else {
-        const { error } = await supabase
+        const { data: inserted, error } = await supabase
           .from('events')
           .insert([{
             title: eventData.title,
@@ -186,9 +188,23 @@ export function EventModal({ isOpen, onClose, onSuccess, event }: EventModalProp
             image_url: eventData.image_url || null,
             community_id: eventData.community_id,
             host_id: eventData.host_id,
-          }]);
+          }])
+          .select('id, title, date_time, community_id')
+          .single();
 
         if (error) throw error;
+
+        // Log activity (non-blocking)
+        await logActivity({
+          action_type: 'event_created',
+          target_type: 'event',
+          target_id: inserted?.id,
+          metadata: {
+            title: inserted?.title,
+            date_time: inserted?.date_time,
+            community_id: inserted?.community_id,
+          },
+        });
 
         toast({
           title: "Event Created",
@@ -280,7 +296,7 @@ export function EventModal({ isOpen, onClose, onSuccess, event }: EventModalProp
                       <SelectContent>
                         {communities.map((community) => (
                           <SelectItem key={community.id} value={community.id}>
-                            {community.name} - {community.city}
+                            {community.name} - {(community.city || '').split(/\s+/).map(s => s ? s[0].toUpperCase() + s.slice(1).toLowerCase() : '').join(' ')}
                           </SelectItem>
                         ))}
                       </SelectContent>
