@@ -320,7 +320,7 @@ export type Database = {
           community_id: string
           created_at: string
           currency: string | null
-          date_time: string
+          date_time: string | null
           description: string | null
           host_id: string | null
           id: string
@@ -336,7 +336,7 @@ export type Database = {
           community_id: string
           created_at?: string
           currency?: string | null
-          date_time: string
+          date_time?: string | null
           description?: string | null
           host_id?: string | null
           id?: string
@@ -352,7 +352,7 @@ export type Database = {
           community_id?: string
           created_at?: string
           currency?: string | null
-          date_time?: string
+          date_time?: string | null
           description?: string | null
           host_id?: string | null
           id?: string

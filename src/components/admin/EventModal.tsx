@@ -20,9 +20,7 @@ import { cn } from '@/lib/utils';
 const eventSchema = z.object({
   title: z.string().min(1, 'Title is required').max(200, 'Title must be less than 200 characters'),
   description: z.string().optional(),
-  date_time: z.date({
-    required_error: 'Event date and time is required',
-  }),
+  date_time: z.date().optional().nullable(),
   venue: z.string().min(1, 'Venue is required').max(200, 'Venue must be less than 200 characters'),
   capacity: z.number().min(1, 'Capacity must be at least 1').max(10000, 'Capacity must be less than 10,000'),
   price: z.number().min(0, 'Price cannot be negative').optional(),
@@ -37,7 +35,7 @@ interface Event {
   id: string;
   title: string;
   description?: string;
-  date_time: string;
+  date_time: string | null;
   venue: string;
   capacity: number;
   price?: number;
@@ -76,7 +74,7 @@ export function EventModal({ isOpen, onClose, onSuccess, event }: EventModalProp
     defaultValues: {
       title: event?.title || '',
       description: event?.description || '',
-      date_time: event ? new Date(event.date_time) : undefined,
+      date_time: event?.date_time ? new Date(event.date_time) : undefined,
       venue: event?.venue || '',
       capacity: event?.capacity || 50,
       price: event?.price || 0,
@@ -94,7 +92,7 @@ export function EventModal({ isOpen, onClose, onSuccess, event }: EventModalProp
       form.reset({
         title: event?.title || '',
         description: event?.description || '',
-        date_time: event ? new Date(event.date_time) : undefined,
+        date_time: event?.date_time ? new Date(event.date_time) : undefined,
         venue: event?.venue || '',
         capacity: event?.capacity || 50,
         price: event?.price || 0,
@@ -155,7 +153,7 @@ export function EventModal({ isOpen, onClose, onSuccess, event }: EventModalProp
 
       const eventData = {
         ...data,
-        date_time: data.date_time.toISOString(),
+        date_time: data.date_time ? data.date_time.toISOString() : null,
         price: data.price || 0,
         host_id: data.host_id || null,
       };
@@ -321,7 +319,7 @@ export function EventModal({ isOpen, onClose, onSuccess, event }: EventModalProp
               name="date_time"
               render={({ field }) => (
                 <FormItem className="flex flex-col">
-                  <FormLabel>Event Date & Time</FormLabel>
+                  <FormLabel>Event Date & Time (Optional - leave blank for TBD)</FormLabel>
                   <Popover>
                     <PopoverTrigger asChild>
                       <FormControl>
@@ -335,7 +333,7 @@ export function EventModal({ isOpen, onClose, onSuccess, event }: EventModalProp
                           {field.value ? (
                             format(field.value, "PPP HH:mm")
                           ) : (
-                            <span>Pick a date and time</span>
+                            <span>Pick a date and time (or leave as TBD)</span>
                           )}
                           <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
                         </Button>
@@ -344,9 +342,8 @@ export function EventModal({ isOpen, onClose, onSuccess, event }: EventModalProp
                     <PopoverContent className="w-auto p-0" align="start">
                       <Calendar
                         mode="single"
-                        selected={field.value}
+                        selected={field.value || undefined}
                         onSelect={field.onChange}
-                        disabled={(date) => date < new Date()}
                         initialFocus
                         className="p-3 pointer-events-auto"
                       />
@@ -368,6 +365,17 @@ export function EventModal({ isOpen, onClose, onSuccess, event }: EventModalProp
                           }}
                           value={field.value ? format(field.value, "HH:mm") : ""}
                         />
+                      </div>
+                      <div className="p-3 border-t">
+                        <Button
+                          type="button"
+                          variant="outline"
+                          size="sm"
+                          className="w-full"
+                          onClick={() => field.onChange(null)}
+                        >
+                          Clear (Set to TBD)
+                        </Button>
                       </div>
                     </PopoverContent>
                   </Popover>

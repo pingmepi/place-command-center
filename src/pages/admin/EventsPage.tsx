@@ -15,7 +15,7 @@ interface Event {
   id: string;
   title: string;
   description?: string;
-  date_time: string;
+  date_time: string | null;
   venue: string;
   capacity: number;
   price?: number;
@@ -88,12 +88,18 @@ const createColumns = (formatCurrency: (value: number, code?: string) => string)
       <div className="flex items-center gap-2">
         <Clock className="h-4 w-4 text-muted-foreground" />
         <div>
-          <p className="text-sm font-medium">
-            {new Date(value).toLocaleDateString()}
-          </p>
-          <p className="text-xs text-muted-foreground">
-            {new Date(value).toLocaleTimeString()}
-          </p>
+          {value ? (
+            <>
+              <p className="text-sm font-medium">
+                {new Date(value).toLocaleDateString()}
+              </p>
+              <p className="text-xs text-muted-foreground">
+                {new Date(value).toLocaleTimeString()}
+              </p>
+            </>
+          ) : (
+            <p className="text-sm font-medium text-muted-foreground">TBD</p>
+          )}
         </div>
       </div>
     ),
@@ -170,9 +176,12 @@ const createColumns = (formatCurrency: (value: number, code?: string) => string)
     header: 'Status',
     filterable: true,
     render: (value, row) => {
-      const isPast = new Date(row.date_time) < new Date();
+      const isPast = row.date_time ? new Date(row.date_time) < new Date() : false;
       if (value) {
         return <Badge variant="destructive">Cancelled</Badge>;
+      }
+      if (!row.date_time) {
+        return <Badge variant="outline">TBD</Badge>;
       }
       if (isPast) {
         return <Badge variant="secondary">Completed</Badge>;

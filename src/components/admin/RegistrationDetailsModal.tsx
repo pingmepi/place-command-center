@@ -34,7 +34,7 @@ interface Registration {
   };
   event: {
     title: string;
-    date_time: string;
+    date_time: string | null;
     venue: string;
     price?: number;
     currency?: string;
@@ -171,7 +171,7 @@ export function RegistrationDetailsModal({
               </div>
               <div className="flex items-center gap-2 text-sm text-muted-foreground">
                 <Clock className="h-4 w-4" />
-                {new Date(registration.event.date_time).toLocaleString()}
+                {registration.event.date_time ? new Date(registration.event.date_time).toLocaleString() : 'TBD'}
               </div>
               <div className="flex items-center gap-2 text-sm text-muted-foreground">
                 <MapPin className="h-4 w-4" />
