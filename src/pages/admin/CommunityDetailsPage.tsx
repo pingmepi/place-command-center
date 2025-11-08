@@ -43,7 +43,7 @@ interface Community {
   recent_events?: Array<{
     id: string;
     title: string;
-    date_time: string;
+    date_time: string | null;
     registration_count?: number;
   }>;
   recent_discussions?: Array<{
@@ -348,7 +348,7 @@ export default function CommunityDetailsPage() {
                       <p className="font-medium">{event.title}</p>
                       <div className="flex items-center gap-2 text-sm text-muted-foreground">
                         <Clock className="h-3 w-3" />
-                        {new Date(event.date_time).toLocaleDateString()}
+                        {event.date_time ? new Date(event.date_time).toLocaleDateString() : 'TBD'}
                       </div>
                     </div>
                     <Badge variant="outline">

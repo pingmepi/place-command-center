@@ -16,7 +16,7 @@ interface Registration {
   updated_at: string;
   event: {
     title: string;
-    date_time: string;
+    date_time: string | null;
     venue: string;
     community: {
       name: string;
@@ -74,12 +74,18 @@ const columns: Column<Registration>[] = [
       <div className="flex items-center gap-2">
         <Clock className="h-4 w-4 text-muted-foreground" />
         <div>
-          <p className="text-sm font-medium">
-            {new Date(row.event.date_time).toLocaleDateString()}
-          </p>
-          <p className="text-xs text-muted-foreground">
-            {new Date(row.event.date_time).toLocaleTimeString()}
-          </p>
+          {row.event.date_time ? (
+            <>
+              <p className="text-sm font-medium">
+                {new Date(row.event.date_time).toLocaleDateString()}
+              </p>
+              <p className="text-xs text-muted-foreground">
+                {new Date(row.event.date_time).toLocaleTimeString()}
+              </p>
+            </>
+          ) : (
+            <p className="text-sm font-medium text-muted-foreground">TBD</p>
+          )}
         </div>
       </div>
     ),

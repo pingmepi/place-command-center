@@ -29,7 +29,7 @@ interface Community {
 interface EventSummary {
   id: string;
   title: string;
-  date_time: string;
+  date_time: string | null;
   registration_count?: number;
 }
 
@@ -218,7 +218,7 @@ export function CommunityDetailsModal({ isOpen, onClose, community, onSuccess }:
                     {recentEvents.map(evt => (
                       <li key={evt.id} className="flex items-center justify-between">
                         <div className="truncate mr-2">{evt.title}</div>
-                        <Badge variant="outline">{new Date(evt.date_time).toLocaleDateString()}</Badge>
+                        <Badge variant="outline">{evt.date_time ? new Date(evt.date_time).toLocaleDateString() : 'TBD'}</Badge>
                       </li>
                     ))}
                   </ul>

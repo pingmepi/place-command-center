@@ -26,7 +26,7 @@ interface Event {
   id: string;
   title: string;
   description?: string;
-  date_time: string;
+  date_time: string | null;
   venue: string;
   capacity: number;
   price?: number;
@@ -97,6 +97,10 @@ export function EventDetailsModal({ isOpen, onClose, event, onSuccess, onViewReg
       return <Badge variant="destructive">Cancelled</Badge>;
     }
 
+    if (!event.date_time) {
+      return <Badge variant="outline">TBD</Badge>;
+    }
+
     const eventDate = new Date(event.date_time);
     const now = new Date();
 
@@ -144,18 +148,24 @@ export function EventDetailsModal({ isOpen, onClose, event, onSuccess, onViewReg
                   <span className="font-medium">Date & Time</span>
                 </div>
                 <div className="text-sm">
-                  <p>{new Date(event.date_time).toLocaleDateString('en-IN', {
-                    weekday: 'long',
-                    year: 'numeric',
-                    month: 'long',
-                    day: 'numeric'
-                  })}</p>
-                  <p className="text-muted-foreground">
-                    {new Date(event.date_time).toLocaleTimeString('en-IN', {
-                      hour: '2-digit',
-                      minute: '2-digit'
-                    })}
-                  </p>
+                  {event.date_time ? (
+                    <>
+                      <p>{new Date(event.date_time).toLocaleDateString('en-IN', {
+                        weekday: 'long',
+                        year: 'numeric',
+                        month: 'long',
+                        day: 'numeric'
+                      })}</p>
+                      <p className="text-muted-foreground">
+                        {new Date(event.date_time).toLocaleTimeString('en-IN', {
+                          hour: '2-digit',
+                          minute: '2-digit'
+                        })}
+                      </p>
+                    </>
+                  ) : (
+                    <p className="text-muted-foreground">TBD</p>
+                  )}
                 </div>
               </div>
 

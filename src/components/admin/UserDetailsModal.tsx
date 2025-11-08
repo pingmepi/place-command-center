@@ -23,7 +23,7 @@ interface UserSummary {
 }
 
 interface CommunityItem { id: string; name: string; city?: string; image_url?: string; }
-interface EventItem { id: string; title: string; date_time: string; venue?: string; status?: string; }
+interface EventItem { id: string; title: string; date_time: string | null; venue?: string; status?: string; }
 interface BadgeItem { badge: string; granted_at: string; }
 
 interface UserDetailsModalProps {
@@ -189,7 +189,7 @@ export function UserDetailsModal({ isOpen, onClose, user, onEdit, onPromote, onB
                   {events.map((e) => (
                     <li key={e.id} className="flex items-center justify-between">
                       <span className="truncate mr-2">{e.title}</span>
-                      <Badge variant="outline">{new Date(e.date_time).toLocaleDateString()}</Badge>
+                      <Badge variant="outline">{e.date_time ? new Date(e.date_time).toLocaleDateString() : 'TBD'}</Badge>
                     </li>
                   ))}
                 </ul>

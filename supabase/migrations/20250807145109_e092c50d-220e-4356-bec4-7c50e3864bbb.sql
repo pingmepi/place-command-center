@@ -5,7 +5,8 @@ INSERT INTO storage.buckets (id, name, public) VALUES
   ('event-images', 'event-images', true);
 
 -- Add image_url column to events table
-ALTER TABLE public.events ADD COLUMN image_url TEXT;
+-- Note: This assumes events table already exists from remote schema
+ALTER TABLE public.events ADD COLUMN IF NOT EXISTS image_url TEXT;
 
 -- Create RLS policies for user avatars bucket
 CREATE POLICY "User avatars are publicly accessible" 
