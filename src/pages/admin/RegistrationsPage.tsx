@@ -1,23 +1,25 @@
-import React, { useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { DataTable, Column } from '@/components/admin/DataTable';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { Download, Calendar, User, CreditCard, Clock, MapPin } from 'lucide-react';
+import { Download, Calendar, CreditCard, Clock, MapPin } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { RegistrationDetailsModal } from '@/components/admin/RegistrationDetailsModal';
 
 interface Registration {
   id: string;
-  status: 'pending' | 'success' | 'failed' | 'cancelled';
-  payment_id?: string;
+  status: 'registered' | 'unregistered';
+  payment_session_id?: string;
   created_at: string;
   updated_at: string;
   event: {
     title: string;
     date_time: string | null;
     venue: string;
+    price?: number;
+    currency?: string;
     community: {
       name: string;
       city: string;
@@ -27,6 +29,15 @@ interface Registration {
     name: string;
     photo_url?: string;
   };
+  payment_session?: {
+    id: string;
+    payment_status: 'yet_to_pay' | 'paid' | null;
+    amount: number;
+    currency: string;
+    expires_at: string;
+    cashfree_order_id?: string | null;
+    cashfree_payment_id?: string | null;
+  } | null;
 }
 
 const columns: Column<Registration>[] = [
@@ -106,23 +117,38 @@ const columns: Column<Registration>[] = [
     },
   },
   {
-    key: 'payment_id',
+    key: 'payment_session',
     header: 'Payment',
-    render: (value, row) => (
-      <div className="flex items-center gap-2">
-        <CreditCard className="h-4 w-4 text-muted-foreground" />
-        <div>
-          {value ? (
-            <div>
-              <p className="text-sm font-medium">Paid</p>
-              <p className="text-xs text-muted-foreground">ID: {value.slice(0, 8)}...</p>
-            </div>
+    render: (_value, row) => {
+      if (!row.payment_session) {
+        return (
+          <div className="flex items-center gap-2">
+            <CreditCard className="h-4 w-4 text-muted-foreground" />
+            <Badge variant="outline" className="bg-gray-100">Free</Badge>
+          </div>
+        );
+      }
+
+      const paymentStatus = row.payment_session.payment_status;
+      const isExpired = new Date(row.payment_session.expires_at) < new Date();
+
+      return (
+        <div className="flex items-center gap-2">
+          <CreditCard className="h-4 w-4 text-muted-foreground" />
+          {paymentStatus === 'paid' ? (
+            <Badge variant="default" className="bg-green-600">Paid</Badge>
+          ) : paymentStatus === 'yet_to_pay' ? (
+            isExpired ? (
+              <Badge variant="destructive" className="bg-red-600">Expired</Badge>
+            ) : (
+              <Badge variant="secondary" className="bg-yellow-600 text-white">Yet to Pay</Badge>
+            )
           ) : (
-            <p className="text-sm text-muted-foreground">Not processed</p>
+            <Badge variant="outline">Unknown</Badge>
           )}
         </div>
-      </div>
-    ),
+      );
+    },
   },
   {
     key: 'created_at',
@@ -156,18 +182,29 @@ export default function RegistrationsPage() {
   const loadRegistrations = async () => {
     try {
       setIsLoading(true);
-      
+
       const { data: registrationsData, error } = await supabase
         .from('event_registrations')
         .select(`
           *,
-          event:events(
+          event:events!event_registrations_event_id_fkey(
             title,
             date_time,
             venue,
+            price,
+            currency,
             community:communities(name, city)
           ),
-          user:users(name, photo_url)
+          user:users!event_registrations_user_id_fkey(name, photo_url),
+          payment_session:payment_sessions!event_registrations_payment_session_id_fkey(
+            id,
+            payment_status,
+            amount,
+            currency,
+            expires_at,
+            cashfree_order_id,
+            cashfree_payment_id
+          )
         `)
         .order('created_at', { ascending: false });
 
@@ -248,15 +285,11 @@ export default function RegistrationsPage() {
         title: registration.event.title,
         date_time: registration.event.date_time,
         venue: registration.event.venue,
-        price: undefined, // Price not available in current data structure
-        currency: undefined, // Currency not available in current data structure
+        price: registration.event.price,
+        currency: registration.event.currency,
       },
-      status: registration.status === 'success' ? 'confirmed' : 
-              registration.status === 'failed' ? 'cancelled' : 
-              registration.status === 'cancelled' ? 'cancelled' : 'pending',
-      payment_status: registration.status === 'success' ? 'paid' : 
-                     registration.status === 'failed' ? 'failed' : 'pending',
-      payment_id: registration.payment_id,
+      status: registration.status,
+      payment_session: registration.payment_session,
       registered_at: registration.created_at,
       special_requests: undefined,
       dietary_preferences: undefined,

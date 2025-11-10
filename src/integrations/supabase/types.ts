@@ -229,6 +229,113 @@ export type Database = {
           },
         ]
       }
+      email_logs: {
+        Row: {
+          created_at: string
+          error_message: string | null
+          event_type: string | null
+          id: string
+          message_id: string | null
+          provider: string
+          recipient: string
+          sent_at: string | null
+          status: string
+          subject: string
+          template_id: string | null
+          template_name: string | null
+          updated_at: string
+          user_id: string | null
+          variables_used: Json | null
+        }
+        Insert: {
+          created_at?: string
+          error_message?: string | null
+          event_type?: string | null
+          id?: string
+          message_id?: string | null
+          provider?: string
+          recipient: string
+          sent_at?: string | null
+          status?: string
+          subject: string
+          template_id?: string | null
+          template_name?: string | null
+          updated_at?: string
+          user_id?: string | null
+          variables_used?: Json | null
+        }
+        Update: {
+          created_at?: string
+          error_message?: string | null
+          event_type?: string | null
+          id?: string
+          message_id?: string | null
+          provider?: string
+          recipient?: string
+          sent_at?: string | null
+          status?: string
+          subject?: string
+          template_id?: string | null
+          template_name?: string | null
+          updated_at?: string
+          user_id?: string | null
+          variables_used?: Json | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "email_logs_template_id_fkey"
+            columns: ["template_id"]
+            isOneToOne: false
+            referencedRelation: "email_templates"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      email_templates: {
+        Row: {
+          created_at: string
+          created_by: string | null
+          display_name: string
+          event_type: string
+          html_content: string
+          id: string
+          is_active: boolean
+          name: string
+          subject: string
+          updated_at: string
+          variables: Json
+          version: number
+        }
+        Insert: {
+          created_at?: string
+          created_by?: string | null
+          display_name: string
+          event_type: string
+          html_content: string
+          id?: string
+          is_active?: boolean
+          name: string
+          subject: string
+          updated_at?: string
+          variables?: Json
+          version?: number
+        }
+        Update: {
+          created_at?: string
+          created_by?: string | null
+          display_name?: string
+          event_type?: string
+          html_content?: string
+          id?: string
+          is_active?: boolean
+          name?: string
+          subject?: string
+          updated_at?: string
+          variables?: Json
+          version?: number
+        }
+        Relationships: []
+      }
       event_registrations: {
         Row: {
           created_at: string
@@ -518,6 +625,7 @@ export type Database = {
           event_id: string
           expires_at: string
           id: string
+          payment_status: Database["public"]["Enums"]["payment_status"] | null
           payment_url: string | null
           status: string
           updated_at: string
@@ -532,6 +640,7 @@ export type Database = {
           event_id: string
           expires_at?: string
           id?: string
+          payment_status?: Database["public"]["Enums"]["payment_status"] | null
           payment_url?: string | null
           status?: string
           updated_at?: string
@@ -546,6 +655,7 @@ export type Database = {
           event_id?: string
           expires_at?: string
           id?: string
+          payment_status?: Database["public"]["Enums"]["payment_status"] | null
           payment_url?: string | null
           status?: string
           updated_at?: string
@@ -725,6 +835,57 @@ export type Database = {
           },
         ]
       }
+      user_requests: {
+        Row: {
+          additional_details: Json | null
+          admin_notes: string | null
+          contact_email: string
+          contact_phone: string | null
+          created_at: string
+          description: string
+          id: string
+          request_type: string
+          reviewed_at: string | null
+          reviewed_by: string | null
+          status: string
+          title: string
+          updated_at: string
+          user_id: string | null
+        }
+        Insert: {
+          additional_details?: Json | null
+          admin_notes?: string | null
+          contact_email: string
+          contact_phone?: string | null
+          created_at?: string
+          description: string
+          id?: string
+          request_type: string
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          status?: string
+          title: string
+          updated_at?: string
+          user_id?: string | null
+        }
+        Update: {
+          additional_details?: Json | null
+          admin_notes?: string | null
+          contact_email?: string
+          contact_phone?: string | null
+          created_at?: string
+          description?: string
+          id?: string
+          request_type?: string
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          status?: string
+          title?: string
+          updated_at?: string
+          user_id?: string | null
+        }
+        Relationships: []
+      }
       user_roles: {
         Row: {
           expires_at: string | null
@@ -781,6 +942,9 @@ export type Database = {
           referred_by: string | null
           role: Database["public"]["Enums"]["user_role"]
           updated_at: string
+          welcome_email_sent: string | null
+          welcome_email_sent_at: string | null
+          whatsapp_number: string | null
         }
         Insert: {
           created_at?: string
@@ -792,6 +956,9 @@ export type Database = {
           referred_by?: string | null
           role?: Database["public"]["Enums"]["user_role"]
           updated_at?: string
+          welcome_email_sent?: string | null
+          welcome_email_sent_at?: string | null
+          whatsapp_number?: string | null
         }
         Update: {
           created_at?: string
@@ -803,6 +970,9 @@ export type Database = {
           referred_by?: string | null
           role?: Database["public"]["Enums"]["user_role"]
           updated_at?: string
+          welcome_email_sent?: string | null
+          welcome_email_sent_at?: string | null
+          whatsapp_number?: string | null
         }
         Relationships: [
           {
@@ -909,10 +1079,7 @@ export type Database = {
         Args: { actor_user_id?: string; event_data: Json; event_type: string }
         Returns: undefined
       }
-      generate_referral_code: {
-        Args: Record<PropertyKey, never>
-        Returns: string
-      }
+      generate_referral_code: { Args: never; Returns: string }
       get_user_highest_role: {
         Args: { _user_id?: string }
         Returns: Database["public"]["Enums"]["app_role"]
@@ -937,14 +1104,8 @@ export type Database = {
         }
         Returns: boolean
       }
-      is_admin: {
-        Args: { _user_id?: string }
-        Returns: boolean
-      }
-      is_admin_user: {
-        Args: { _user_id?: string }
-        Returns: boolean
-      }
+      is_admin: { Args: { _user_id?: string }; Returns: boolean }
+      is_admin_user: { Args: { _user_id?: string }; Returns: boolean }
       is_community_member: {
         Args: { _community_id: string; _user_id: string }
         Returns: boolean
@@ -958,7 +1119,8 @@ export type Database = {
         | "event_organizer"
         | "user"
       flag_status: "open" | "resolved" | "urgent"
-      registration_status: "pending" | "success" | "failed" | "cancelled"
+      payment_status: "yet_to_pay" | "paid"
+      registration_status: "unregistered" | "registered"
       user_role: "user" | "admin"
     }
     CompositeTypes: {
@@ -1095,8 +1257,11 @@ export const Constants = {
         "user",
       ],
       flag_status: ["open", "resolved", "urgent"],
-      registration_status: ["pending", "success", "failed", "cancelled"],
+      payment_status: ["yet_to_pay", "paid"],
+      registration_status: ["unregistered", "registered"],
       user_role: ["user", "admin"],
     },
   },
 } as const
+A new version of Supabase CLI is available: v2.54.11 (currently installed v2.48.3)
+We recommend updating regularly for new features and bug fixes: https://supabase.com/docs/guides/cli/getting-started#updating-the-supabase-cli
