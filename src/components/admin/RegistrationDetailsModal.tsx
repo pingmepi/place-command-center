@@ -39,9 +39,16 @@ interface Registration {
     price?: number;
     currency?: string;
   };
-  status: 'confirmed' | 'cancelled' | 'pending' | 'refunded';
-  payment_status: 'paid' | 'pending' | 'failed' | 'refunded' | 'free';
-  payment_id?: string;
+  status: 'registered' | 'unregistered';
+  payment_session?: {
+    id: string;
+    payment_status: 'yet_to_pay' | 'paid' | null;
+    amount: number;
+    currency: string;
+    expires_at: string;
+    cashfree_order_id?: string | null;
+    cashfree_payment_id?: string | null;
+  } | null;
   registered_at: string;
   special_requests?: string;
   dietary_preferences?: string;
@@ -77,14 +84,10 @@ export function RegistrationDetailsModal({
 
   const getStatusIcon = (status: string) => {
     switch (status) {
-      case 'confirmed':
+      case 'registered':
         return <CheckCircle className="h-4 w-4 text-success" />;
-      case 'cancelled':
+      case 'unregistered':
         return <XCircle className="h-4 w-4 text-destructive" />;
-      case 'pending':
-        return <AlertCircle className="h-4 w-4 text-warning" />;
-      case 'refunded':
-        return <AlertCircle className="h-4 w-4 text-muted-foreground" />;
       default:
         return <AlertCircle className="h-4 w-4 text-muted-foreground" />;
     }
@@ -92,34 +95,108 @@ export function RegistrationDetailsModal({
 
   const getStatusVariant = (status: string) => {
     switch (status) {
-      case 'confirmed':
+      case 'registered':
         return 'default' as const;
-      case 'cancelled':
+      case 'unregistered':
         return 'destructive' as const;
-      case 'pending':
-        return 'secondary' as const;
-      case 'refunded':
-        return 'outline' as const;
       default:
         return 'secondary' as const;
     }
   };
 
-  const getPaymentStatusVariant = (status: string) => {
-    switch (status) {
-      case 'paid':
-        return 'default' as const;
-      case 'failed':
-        return 'destructive' as const;
-      case 'pending':
-        return 'secondary' as const;
-      case 'refunded':
-        return 'outline' as const;
-      case 'free':
-        return 'outline' as const;
-      default:
-        return 'secondary' as const;
+  const getPaymentStatusDisplay = (registration: Registration) => {
+    const eventPrice = registration.event.price || 0;
+
+    // Free event (price is 0)
+    if (eventPrice === 0) {
+      return {
+        badge: <Badge variant="outline" className="bg-gray-100">Free Event</Badge>,
+        details: (
+          <div className="space-y-2 mt-2">
+            <div className="text-sm text-muted-foreground">
+              This is a free event. No payment required.
+            </div>
+          </div>
+        )
+      };
     }
+
+    // Paid event but no payment session created yet
+    if (!registration.payment_session) {
+      return {
+        badge: <Badge variant="secondary" className="bg-orange-600 text-white">Payment Pending</Badge>,
+        details: (
+          <div className="space-y-2 mt-2">
+            <div className="text-sm text-muted-foreground">
+              <strong>Event Price:</strong> {formatCurrency(eventPrice)}
+            </div>
+            <div className="text-sm text-orange-600">
+              Payment session not yet created. User may need to complete registration.
+            </div>
+          </div>
+        )
+      };
+    }
+
+    const paymentStatus = registration.payment_session.payment_status;
+    const isExpired = new Date(registration.payment_session.expires_at) < new Date();
+
+    if (paymentStatus === 'paid') {
+      return {
+        badge: <Badge variant="default" className="bg-green-600">Paid</Badge>,
+        details: (
+          <div className="space-y-2 mt-2">
+            <div className="text-sm text-muted-foreground">
+              <strong>Amount:</strong> {formatCurrency(registration.payment_session.amount)}
+            </div>
+            {registration.payment_session.cashfree_payment_id && (
+              <div className="text-sm text-muted-foreground">
+                <strong>Payment ID:</strong> <code className="text-xs bg-muted px-2 py-1 rounded">{registration.payment_session.cashfree_payment_id}</code>
+              </div>
+            )}
+          </div>
+        )
+      };
+    } else if (paymentStatus === 'yet_to_pay') {
+      if (isExpired) {
+        return {
+          badge: <Badge variant="destructive" className="bg-red-600">Expired - Yet to Pay</Badge>,
+          details: (
+            <div className="space-y-2 mt-2">
+              <div className="text-sm text-destructive">
+                <strong>Expired:</strong> {new Date(registration.payment_session.expires_at).toLocaleString()}
+              </div>
+              <div className="text-sm text-muted-foreground">
+                <strong>Amount Due:</strong> {formatCurrency(registration.payment_session.amount)}
+              </div>
+            </div>
+          )
+        };
+      }
+      return {
+        badge: <Badge variant="secondary" className="bg-yellow-600 text-white">Yet to Pay</Badge>,
+        details: (
+          <div className="space-y-2 mt-2">
+            <div className="text-sm text-muted-foreground">
+              <strong>Amount Due:</strong> {formatCurrency(registration.payment_session.amount)}
+            </div>
+            <div className="text-sm text-muted-foreground">
+              <strong>Expires:</strong> {new Date(registration.payment_session.expires_at).toLocaleString()}
+            </div>
+            {registration.payment_session.cashfree_order_id && (
+              <div className="text-sm text-muted-foreground">
+                <strong>Order ID:</strong> <code className="text-xs bg-muted px-2 py-1 rounded">{registration.payment_session.cashfree_order_id}</code>
+              </div>
+            )}
+          </div>
+        )
+      };
+    }
+
+    return {
+      badge: <Badge variant="outline">Unknown Status</Badge>,
+      details: null
+    };
   };
 
   return (
@@ -189,10 +266,10 @@ export function RegistrationDetailsModal({
 
           {/* Registration Status */}
           <div className="space-y-4">
-            <h3 className="text-lg font-semibold">Registration Status</h3>
-            <div className="grid grid-cols-2 gap-4">
+            <h3 className="text-lg font-semibold">Registration & Payment Status</h3>
+            <div className="space-y-4">
               <div className="space-y-2">
-                <label className="text-sm font-medium text-muted-foreground">Status</label>
+                <label className="text-sm font-medium text-muted-foreground">Registration Status</label>
                 <div className="flex items-center gap-2">
                   {getStatusIcon(registration.status)}
                   <Badge variant={getStatusVariant(registration.status)}>
@@ -200,22 +277,13 @@ export function RegistrationDetailsModal({
                   </Badge>
                 </div>
               </div>
+
               <div className="space-y-2">
                 <label className="text-sm font-medium text-muted-foreground">Payment Status</label>
-                <Badge variant={getPaymentStatusVariant(registration.payment_status)}>
-                  {registration.payment_status.charAt(0).toUpperCase() + registration.payment_status.slice(1)}
-                </Badge>
+                {getPaymentStatusDisplay(registration).badge}
+                {getPaymentStatusDisplay(registration).details}
               </div>
             </div>
-
-            {registration.payment_id && (
-              <div className="space-y-2">
-                <label className="text-sm font-medium text-muted-foreground">Payment ID</label>
-                <code className="text-xs bg-muted px-2 py-1 rounded">
-                  {registration.payment_id}
-                </code>
-              </div>
-            )}
 
             <div className="space-y-2">
               <label className="text-sm font-medium text-muted-foreground">Registered At</label>

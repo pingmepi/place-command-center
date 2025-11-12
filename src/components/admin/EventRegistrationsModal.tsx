@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import {
   Dialog,
   DialogContent,
@@ -8,10 +8,8 @@ import {
 } from '@/components/ui/dialog';
 import { Badge } from '@/components/ui/badge';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { Button } from '@/components/ui/button';
-import { 
-  User, 
-  Calendar, 
+import {
+  User,
   Clock,
   Mail,
   Phone,
@@ -22,7 +20,6 @@ import {
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { RegistrationDetailsModal } from './RegistrationDetailsModal';
-import { useCurrency } from '@/context/CurrencyProvider';
 
 interface Registration {
   id: string;
@@ -39,9 +36,16 @@ interface Registration {
     price?: number;
     currency?: string;
   };
-  status: 'confirmed' | 'cancelled' | 'pending' | 'refunded';
-  payment_status: 'paid' | 'pending' | 'failed' | 'refunded' | 'free';
-  payment_id?: string;
+  status: 'registered' | 'unregistered';
+  payment_session?: {
+    id: string;
+    payment_status: 'yet_to_pay' | 'paid' | null;
+    amount: number;
+    currency: string;
+    expires_at: string;
+    cashfree_order_id?: string | null;
+    cashfree_payment_id?: string | null;
+  } | null;
   registered_at: string;
   special_requests?: string;
   dietary_preferences?: string;
@@ -69,7 +73,6 @@ export function EventRegistrationsModal({
   const [selectedRegistration, setSelectedRegistration] = useState<Registration | null>(null);
   const [isDetailsModalOpen, setIsDetailsModalOpen] = useState(false);
   const { toast } = useToast();
-  const { formatCurrency } = useCurrency();
 
   useEffect(() => {
     if (isOpen && eventId) {
@@ -82,20 +85,38 @@ export function EventRegistrationsModal({
 
     try {
       setIsLoading(true);
-      
+
       const { data, error } = await supabase
         .from('event_registrations')
         .select(`
           *,
-          user:users(name, photo_url),
-          event:events(title, date_time, venue, price, currency)
+          user:users!event_registrations_user_id_fkey(name, photo_url),
+          event:events!event_registrations_event_id_fkey(title, date_time, venue, price, currency),
+          payment_session:payment_sessions!event_registrations_payment_session_id_fkey(
+            id,
+            payment_status,
+            amount,
+            currency,
+            expires_at,
+            cashfree_order_id,
+            cashfree_payment_id
+          )
         `)
         .eq('event_id', eventId)
         .order('created_at', { ascending: false });
 
       if (error) throw error;
 
-      const transformedData: Registration[] = data?.map(reg => ({
+      console.log('Raw registration data:', data);
+
+      const transformedData: Registration[] = data?.map(reg => {
+        console.log('Processing registration:', {
+          id: reg.id,
+          payment_session_id: reg.payment_session_id,
+          payment_session: reg.payment_session,
+          event_price: reg.event?.price
+        });
+        return {
         id: reg.id,
         user: {
           ...reg.user,
@@ -103,17 +124,22 @@ export function EventRegistrationsModal({
           phone: undefined,
         },
         event: reg.event,
-        status: reg.status === 'success' ? 'confirmed' : 
-                reg.status === 'failed' ? 'cancelled' : 
-                reg.status === 'cancelled' ? 'cancelled' : 'pending',
-        payment_status: reg.status === 'success' ? 'paid' : 
-                       reg.status === 'failed' ? 'failed' : 'pending',
-        payment_id: reg.payment_id,
+        status: reg.status,
+        payment_session: reg.payment_session ? {
+          id: reg.payment_session.id,
+          payment_status: reg.payment_session.payment_status,
+          amount: reg.payment_session.amount,
+          currency: reg.payment_session.currency,
+          expires_at: reg.payment_session.expires_at,
+          cashfree_order_id: reg.payment_session.cashfree_order_id,
+          cashfree_payment_id: reg.payment_session.cashfree_payment_id,
+        } : null,
         registered_at: reg.created_at,
         special_requests: undefined,
         dietary_preferences: undefined,
         emergency_contact: undefined,
-      })) || [];
+      };
+      }) || [];
 
       setRegistrations(transformedData);
     } catch (error) {
@@ -130,14 +156,10 @@ export function EventRegistrationsModal({
 
   const getStatusIcon = (status: string) => {
     switch (status) {
-      case 'confirmed':
+      case 'registered':
         return <CheckCircle className="h-4 w-4 text-success" />;
-      case 'cancelled':
+      case 'unregistered':
         return <XCircle className="h-4 w-4 text-destructive" />;
-      case 'pending':
-        return <AlertCircle className="h-4 w-4 text-warning" />;
-      case 'refunded':
-        return <AlertCircle className="h-4 w-4 text-muted-foreground" />;
       default:
         return <AlertCircle className="h-4 w-4 text-muted-foreground" />;
     }
@@ -145,17 +167,41 @@ export function EventRegistrationsModal({
 
   const getStatusVariant = (status: string) => {
     switch (status) {
-      case 'confirmed':
+      case 'registered':
         return 'default' as const;
-      case 'cancelled':
+      case 'unregistered':
         return 'destructive' as const;
-      case 'pending':
-        return 'secondary' as const;
-      case 'refunded':
-        return 'outline' as const;
       default:
         return 'secondary' as const;
     }
+  };
+
+  const getPaymentStatusBadge = (registration: Registration) => {
+    const eventPrice = registration.event.price || 0;
+
+    // Free event (price is 0)
+    if (eventPrice === 0) {
+      return <Badge variant="outline" className="bg-gray-100">Free</Badge>;
+    }
+
+    // Paid event but no payment session created yet
+    if (!registration.payment_session) {
+      return <Badge variant="secondary" className="bg-orange-600 text-white">Payment Pending</Badge>;
+    }
+
+    const paymentStatus = registration.payment_session.payment_status;
+    const isExpired = new Date(registration.payment_session.expires_at) < new Date();
+
+    if (paymentStatus === 'paid') {
+      return <Badge variant="default" className="bg-green-600">Paid</Badge>;
+    } else if (paymentStatus === 'yet_to_pay') {
+      if (isExpired) {
+        return <Badge variant="destructive" className="bg-red-600">Expired - Yet to Pay</Badge>;
+      }
+      return <Badge variant="secondary" className="bg-yellow-600 text-white">Yet to Pay</Badge>;
+    }
+
+    return <Badge variant="outline">Unknown</Badge>;
   };
 
   const handleViewDetails = (registration: Registration) => {
@@ -241,11 +287,8 @@ export function EventRegistrationsModal({
                           {registration.status.charAt(0).toUpperCase() + registration.status.slice(1)}
                         </Badge>
                       </div>
-                      
-                      <Badge variant="outline">
-                        {registration.payment_status === 'free' ? 'Free' : 
-                         registration.payment_status.charAt(0).toUpperCase() + registration.payment_status.slice(1)}
-                      </Badge>
+
+                      {getPaymentStatusBadge(registration)}
                     </div>
                   </div>
                 ))}
