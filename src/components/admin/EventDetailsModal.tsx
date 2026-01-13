@@ -42,7 +42,7 @@ interface Event {
   host: {
     name: string;
     photo_url?: string;
-  };
+  } | null;
   registration_count?: number;
 }
 
@@ -240,19 +240,23 @@ export function EventDetailsModal({ isOpen, onClose, event, onSuccess, onViewReg
                   <User className="h-4 w-4 text-primary" />
                   <span className="font-medium">Host</span>
                 </div>
-                <div className="flex items-center gap-3">
-                  <Avatar className="h-8 w-8">
-                    <AvatarImage
-                      src={safeString(event.host.photo_url) || undefined}
-                      alt={safeString(event.host.name) || 'Host avatar'}
-                      onError={(e) => { e.currentTarget.onerror = null; e.currentTarget.src = ''; }}
-                    />
-                    <AvatarFallback>
-                      {getInitials(event.host.name)}
-                    </AvatarFallback>
-                  </Avatar>
-                  <p className="text-sm font-medium">{event.host.name}</p>
-                </div>
+                {event.host ? (
+                  <div className="flex items-center gap-3">
+                    <Avatar className="h-8 w-8">
+                      <AvatarImage
+                        src={safeString(event.host.photo_url) || undefined}
+                        alt={safeString(event.host.name) || 'Host avatar'}
+                        onError={(e) => { e.currentTarget.onerror = null; e.currentTarget.src = ''; }}
+                      />
+                      <AvatarFallback>
+                        {getInitials(event.host.name)}
+                      </AvatarFallback>
+                    </Avatar>
+                    <p className="text-sm font-medium">{event.host.name}</p>
+                  </div>
+                ) : (
+                  <p className="text-sm text-muted-foreground">No host assigned</p>
+                )}
               </div>
             </div>
 

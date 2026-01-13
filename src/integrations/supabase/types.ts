@@ -1080,6 +1080,10 @@ export type Database = {
         Returns: undefined
       }
       generate_referral_code: { Args: never; Returns: string }
+      get_user_email: {
+        Args: { _user_id: string }
+        Returns: string
+      }
       get_user_highest_role: {
         Args: { _user_id?: string }
         Returns: Database["public"]["Enums"]["app_role"]

@@ -68,6 +68,10 @@ interface RegistrationDetailsModalProps {
   onCancel?: () => void;
 }
 
+const safeString = (v: unknown): string => {
+  if (v === null || v === undefined) return '';
+  try { return String(v); } catch { return ''; }
+};
 
 export function RegistrationDetailsModal({
   isOpen,
