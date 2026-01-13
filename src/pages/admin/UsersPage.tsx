@@ -12,6 +12,7 @@ import { UserDetailsModal } from '@/components/admin/UserDetailsModal';
 interface User {
   id: string;
   name: string;
+  email?: string;
   photo_url?: string;
   role: 'user' | 'admin';
   is_banned: boolean;
@@ -47,22 +48,6 @@ function getInitials(name?: string): string {
 
 const columns: Column<User>[] = [
   {
-    key: 'photo_url',
-    header: 'Avatar',
-    render: (value, user) => (
-      <Avatar className="h-10 w-10">
-        <AvatarImage
-          src={safeString(value) || undefined}
-          alt={safeString((user as User)?.name) || 'User avatar'}
-          onError={(e) => { e.currentTarget.onerror = null; e.currentTarget.src = ''; }}
-        />
-        <AvatarFallback className="text-xs">
-          {getInitials((user as User)?.name)}
-        </AvatarFallback>
-      </Avatar>
-    ),
-  },
-  {
     key: 'name',
     header: 'User',
     sortable: true,
@@ -81,7 +66,7 @@ const columns: Column<User>[] = [
         <div>
           <p className="font-medium">{safeString(row.name) || 'Unknown'}</p>
           <p className="text-sm text-muted-foreground">
-            ID: {safeString(row.id).slice(0, 8)}...
+            {safeString(row.email) || `ID: ${safeString(row.id).slice(0, 8)}...`}
           </p>
         </div>
       </div>
@@ -220,11 +205,11 @@ export default function UsersPage() {
 
       console.log('Users data:', usersData);
 
-      // Get counts separately to avoid complex joins
+      // Get counts and email separately to avoid complex joins
       const usersWithCounts = await Promise.all(
         (usersData || []).map(async (user) => {
           try {
-            const [communityResult, eventResult, badgeResult] = await Promise.all([
+            const [communityResult, eventResult, badgeResult, emailResult] = await Promise.all([
               supabase
                 .from('community_members')
                 .select('user_id')
@@ -236,11 +221,14 @@ export default function UsersPage() {
               supabase
                 .from('user_badges')
                 .select('user_id')
-                .eq('user_id', user.id)
+                .eq('user_id', user.id),
+              // Fetch email from auth.users using RPC function
+              supabase.rpc('get_user_email', { _user_id: user.id })
             ]);
 
             return {
               ...user,
+              email: emailResult.data || undefined,
               community_count: communityResult.data?.length || 0,
               event_count: eventResult.data?.length || 0,
               badge_count: badgeResult.data?.length || 0,
@@ -249,6 +237,7 @@ export default function UsersPage() {
             console.error(`Error loading counts for user ${user.id}:`, error);
             return {
               ...user,
+              email: undefined,
               community_count: 0,
               event_count: 0,
               badge_count: 0,

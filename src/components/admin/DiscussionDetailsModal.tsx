@@ -109,7 +109,7 @@ export function DiscussionDetailsModal({ isOpen, onClose, discussion, onEdit, on
               <label className="text-sm font-medium text-muted-foreground">Creator</label>
               <div className="flex items-center gap-2">
                 <Avatar className="h-6 w-6">
-                  <AvatarImage src={creator?.photo_url} />
+                  <AvatarImage src={safeString(creator?.photo_url) || undefined} />
                   <AvatarFallback className="text-[10px]">{getInitials(creator?.name)}</AvatarFallback>
                 </Avatar>
                 <span className="text-sm">{creator?.name || '—'}</span>
@@ -134,11 +134,11 @@ export function DiscussionDetailsModal({ isOpen, onClose, discussion, onEdit, on
                 {comments.map((c) => (
                   <div key={c.id} className="flex gap-3 p-2 bg-muted/60 rounded">
                     <Avatar className="h-6 w-6">
-                      <AvatarImage src={c.user.photo_url} />
-                      <AvatarFallback className="text-[10px]">{getInitials(c.user.name)}</AvatarFallback>
+                      <AvatarImage src={safeString(c.user?.photo_url) || undefined} />
+                      <AvatarFallback className="text-[10px]">{getInitials(c.user?.name)}</AvatarFallback>
                     </Avatar>
                     <div className="flex-1">
-                      <p className="text-sm font-medium">{c.user.name}</p>
+                      <p className="text-sm font-medium">{c.user?.name || 'Unknown'}</p>
                       <p className="text-xs text-muted-foreground">{new Date(c.created_at).toLocaleString()}</p>
                     </div>
                   </div>

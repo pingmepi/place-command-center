@@ -4,13 +4,14 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Separator } from '@/components/ui/separator';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { Loader2, Users, Calendar as CalendarIcon, Award, Clock, Share2, Edit, Trash2, Shield, UserX } from 'lucide-react';
+import { Loader2, Users, Calendar as CalendarIcon, Award, Clock, Share2, Edit, Trash2, Shield, UserX, Mail } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 
 interface UserSummary {
   id: string;
   name: string;
+  email?: string;
   photo_url?: string;
   role: 'user' | 'admin';
   is_banned: boolean;
@@ -122,6 +123,11 @@ export function UserDetailsModal({ isOpen, onClose, user, onEdit, onPromote, onB
             </Avatar>
             <div className="flex-1">
               <h3 className="text-lg font-semibold">{user.name}</h3>
+              {user.email && (
+                <div className="mt-1 flex items-center gap-1 text-sm text-muted-foreground">
+                  <Mail className="h-3 w-3"/> {user.email}
+                </div>
+              )}
               <div className="mt-2 flex flex-wrap items-center gap-2 text-sm text-muted-foreground">
                 <Badge variant={user.role === 'admin' ? 'default' : 'secondary'}>{user.role === 'admin' ? 'Admin' : 'User'}</Badge>
                 {user.is_banned && <Badge variant="destructive">Banned</Badge>}
