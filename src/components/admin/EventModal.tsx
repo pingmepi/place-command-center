@@ -31,7 +31,7 @@ const eventSchema = z.object({
   capacity: z.number().min(1, 'Capacity must be at least 1').max(10000, 'Capacity must be less than 10,000'),
   price: z.number().min(0, 'Price cannot be negative').optional(),
   image_url: z.string().optional(),
-  external_link: z.string().url('External link must be a valid URL').optional(),
+  external_link: z.string().url('External link must be a valid URL').optional().or(z.literal('')),
   community_id: z.string().min(1, 'Community is required'),
   host_id: z.string().optional(),
 });
@@ -805,7 +805,7 @@ export function EventModal({ isOpen, onClose, onSuccess, event }: EventModalProp
                   <FormLabel>External Registration Link (Optional)</FormLabel>
                   <FormControl>
                     <Input
-                      placeholder="https://bookmyshow.com/... or https://ticketmaster.com/..."
+                      placeholder="https://example.com/register"
                       type="url"
                       {...field}
                     />
