@@ -28,6 +28,7 @@ interface Community {
   state?: string;
   country?: string;
   image_url?: string;
+  header_image_url?: string;
   created_by: string;
   created_at: string;
   updated_at: string;
@@ -56,6 +57,11 @@ interface Community {
     photo_url?: string;
     event_count?: number;
   }>;
+}
+
+interface CommunityCreator {
+  name: string;
+  photo_url?: string;
 }
 
 // Helpers for null-safe strings and initials
@@ -119,6 +125,13 @@ export default function CommunityDetailsPage() {
         .order('date_time', { ascending: false })
         .limit(5);
 
+      const { data: galleryMedia } = await supabase
+        .from('gallery_media')
+        .select('media_url, sort_order')
+        .eq('community_id', communityId)
+        .order('sort_order', { ascending: true })
+        .limit(1);
+
       // Load recent discussions
       const { data: recentDiscussions } = await supabase
         .from('discussions')
@@ -141,10 +154,13 @@ export default function CommunityDetailsPage() {
         state: undefined,
         country: undefined,
         image_url: data.image_url ?? undefined,
+        header_image_url: galleryMedia?.[0]?.media_url ?? undefined,
         created_by: 'unknown',
         created_at: data.created_at,
         updated_at: data.updated_at,
-        creator: Array.isArray(data.creator) ? data.creator[0] : data.creator as any,
+        creator: Array.isArray(data.creator)
+          ? (data.creator[0] as CommunityCreator)
+          : (data.creator as CommunityCreator),
         member_count: data.member_count?.[0]?.count || 0,
         event_count: data.event_count?.[0]?.count || 0,
         discussion_count: data.discussion_count?.[0]?.count || 0,
@@ -250,11 +266,11 @@ export default function CommunityDetailsPage() {
         <CardHeader>
           <div className="flex items-start gap-4">
             <Avatar className="h-20 w-20">
-              <AvatarImage
-                src={safeString(community.image_url) || undefined}
-                alt={safeString(community.name) || 'Community image'}
-                onError={(e) => { e.currentTarget.onerror = null; e.currentTarget.src = ''; }}
-              />
+                <AvatarImage
+                  src={safeString(community.header_image_url) || undefined}
+                  alt={safeString(community.name) || 'Community image'}
+                  onError={(e) => { e.currentTarget.onerror = null; e.currentTarget.src = ''; }}
+                />
               <AvatarFallback className="text-xl">
                 {getInitials(community.name)}
               </AvatarFallback>

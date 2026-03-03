@@ -36,6 +36,20 @@ interface UserDetailsModalProps {
   onBan?: (user: UserSummary) => void;
 }
 
+interface CommunityMembershipRow {
+  community: CommunityItem | null;
+}
+
+interface EventRegistrationRow {
+  status: string;
+  event: {
+    id: string;
+    title: string;
+    date_time: string | null;
+    venue?: string;
+  } | null;
+}
+
 const safeString = (v: unknown): string => {
   if (v === null || v === undefined) return '';
   try { return String(v); } catch { return ''; }
@@ -87,8 +101,8 @@ export function UserDetailsModal({ isOpen, onClose, user, onEdit, onPromote, onB
             : Promise.resolve({ data: null }),
         ]);
 
-        setCommunities((cmRes.data || []).map((r: any) => r.community).filter(Boolean));
-        setEvents((evRes.data || []).map((r: any) => ({
+        setCommunities(((cmRes.data || []) as CommunityMembershipRow[]).map((r) => r.community).filter(Boolean) as CommunityItem[]);
+        setEvents(((evRes.data || []) as EventRegistrationRow[]).map((r) => ({
           id: r.event?.id,
           title: r.event?.title,
           date_time: r.event?.date_time,
@@ -96,7 +110,7 @@ export function UserDetailsModal({ isOpen, onClose, user, onEdit, onPromote, onB
           status: r.status,
         })).filter((e: EventItem) => !!e.id));
         setBadges((bdRes.data || []) as BadgeItem[]);
-        setReferrerName((refRes as any)?.data?.name ?? null);
+        setReferrerName((refRes as { data: { name?: string } | null })?.data?.name ?? null);
       } catch (err) {
         console.error('Error loading user details:', err);
         toast({ title: 'Error Loading User', description: 'Failed to load user details.', variant: 'destructive' });
@@ -239,4 +253,3 @@ export function UserDetailsModal({ isOpen, onClose, user, onEdit, onPromote, onB
     </Dialog>
   );
 }
-
