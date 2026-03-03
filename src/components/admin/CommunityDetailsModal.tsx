@@ -22,7 +22,6 @@ interface Community {
   name: string;
   description?: string;
   city: string;
-  image_url?: string;
   created_at: string;
   member_count?: number;
   event_count?: number;
@@ -299,7 +298,7 @@ export function CommunityDetailsModal({ isOpen, onClose, community, onSuccess }:
                   <span className="font-medium">Recent Events</span>
                 </div>
                 {isLoading ? (
-                  <div className="flex items-center gap-2 text-sm text-muted-foreground"><Loader2 className="h-4 w-4 animate-spin"/> Loading…</div>
+                  <div className="flex items-center gap-2 text-sm text-muted-foreground"><Loader2 className="h-4 w-4 animate-spin" /> Loading…</div>
                 ) : recentEvents.length ? (
                   <ul className="space-y-2 text-sm">
                     {recentEvents.map(evt => (
@@ -320,7 +319,7 @@ export function CommunityDetailsModal({ isOpen, onClose, community, onSuccess }:
                   <span className="font-medium">Recent Discussions</span>
                 </div>
                 {isLoading ? (
-                  <div className="flex items-center gap-2 text-sm text-muted-foreground"><Loader2 className="h-4 w-4 animate-spin"/> Loading…</div>
+                  <div className="flex items-center gap-2 text-sm text-muted-foreground"><Loader2 className="h-4 w-4 animate-spin" /> Loading…</div>
                 ) : recentDiscussions.length ? (
                   <ul className="space-y-2 text-sm">
                     {recentDiscussions.map(d => (

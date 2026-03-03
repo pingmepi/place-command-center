@@ -27,7 +27,6 @@ interface Community {
   city: string;
   state?: string;
   country?: string;
-  image_url?: string;
   header_image_url?: string;
   created_by: string;
   created_at: string;
@@ -153,7 +152,6 @@ export default function CommunityDetailsPage() {
         city: data.city,
         state: undefined,
         country: undefined,
-        image_url: data.image_url ?? undefined,
         header_image_url: galleryMedia?.[0]?.media_url ?? undefined,
         created_by: 'unknown',
         created_at: data.created_at,
@@ -266,11 +264,11 @@ export default function CommunityDetailsPage() {
         <CardHeader>
           <div className="flex items-start gap-4">
             <Avatar className="h-20 w-20">
-                <AvatarImage
-                  src={safeString(community.header_image_url) || undefined}
-                  alt={safeString(community.name) || 'Community image'}
-                  onError={(e) => { e.currentTarget.onerror = null; e.currentTarget.src = ''; }}
-                />
+              <AvatarImage
+                src={safeString(community.header_image_url) || undefined}
+                alt={safeString(community.name) || 'Community image'}
+                onError={(e) => { e.currentTarget.onerror = null; e.currentTarget.src = ''; }}
+              />
               <AvatarFallback className="text-xl">
                 {getInitials(community.name)}
               </AvatarFallback>

@@ -132,7 +132,6 @@ export function buildChildEvents(
     venue: string;
     capacity: number;
     price?: number | null;
-    image_url?: string | null;
     external_link?: string | null;
     community_id: string;
     host_id?: string | null;
