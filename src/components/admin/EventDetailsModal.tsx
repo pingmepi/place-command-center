@@ -23,6 +23,7 @@ import {
   Copy,
   Check,
   ExternalLink,
+  Share2,
 } from 'lucide-react';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent as AlertContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader as AlertHeader, AlertDialogTitle as AlertTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
 import { EventModal } from './EventModal';
@@ -30,6 +31,7 @@ import { useCurrency } from '@/context/CurrencyProvider';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { buildEventShortUrl } from '@/lib/short-url';
+import { PostJobDetailsModal } from './PostJobDetailsModal';
 
 interface Event {
   id: string;
@@ -95,6 +97,7 @@ export function EventDetailsModal({ isOpen, onClose, event, onSuccess, onViewReg
   const [copied, setCopied] = useState(false);
   const [galleryMedia, setGalleryMedia] = useState<GalleryMediaRow[]>([]);
   const [isLoadingGallery, setIsLoadingGallery] = useState(false);
+  const [isSocialModalOpen, setIsSocialModalOpen] = useState(false);
 
   const { formatCurrency } = useCurrency();
   const { toast } = useToast();
@@ -549,6 +552,14 @@ export function EventDetailsModal({ isOpen, onClose, event, onSuccess, onViewReg
                   View Registrations
                 </Button>
               )}
+              <Button
+                variant="outline"
+                className="gap-2"
+                onClick={() => setIsSocialModalOpen(true)}
+              >
+                <Share2 className="h-4 w-4" />
+                Social Posts
+              </Button>
               {onCancel && (
                 <AlertDialog>
                   <AlertDialogTrigger asChild>
@@ -578,6 +589,13 @@ export function EventDetailsModal({ isOpen, onClose, event, onSuccess, onViewReg
         onClose={() => setIsEditModalOpen(false)}
         onSuccess={handleEditSuccess}
         event={event}
+      />
+
+      <PostJobDetailsModal
+        isOpen={isSocialModalOpen}
+        onClose={() => setIsSocialModalOpen(false)}
+        eventId={event?.id ?? null}
+        eventTitle={event?.title ?? ''}
       />
     </>
   );
