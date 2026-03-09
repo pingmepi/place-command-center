@@ -135,7 +135,7 @@ export function EventDetailsModal({ isOpen, onClose, event, onSuccess, onViewReg
       setIsLoadingGallery(true);
       const { data, error } = await supabase
         .from('gallery_media')
-        .select('media_url, sort_order')
+        .select('media_url, mimetype, sort_order')
         .eq('event_id', event.id)
         .order('sort_order', { ascending: true });
 
@@ -422,11 +422,20 @@ export function EventDetailsModal({ isOpen, onClose, event, onSuccess, onViewReg
                     <div className="flex gap-2 overflow-x-auto pb-2 snap-x">
                       {galleryMedia.map((media, i) => (
                         <div key={i} className="relative h-24 w-24 shrink-0 overflow-hidden rounded-md border bg-muted snap-start">
-                          <img
-                            src={media.media_url}
-                            alt={`Gallery image ${i + 1}`}
-                            className="h-full w-full object-cover"
-                          />
+                          {media.mimetype?.startsWith('video/') ? (
+                            <video
+                              src={media.media_url}
+                              className="h-full w-full object-cover"
+                              muted
+                              playsInline
+                            />
+                          ) : (
+                            <img
+                              src={media.media_url}
+                              alt={`Gallery image ${i + 1}`}
+                              className="h-full w-full object-cover"
+                            />
+                          )}
                         </div>
                       ))}
                     </div>
